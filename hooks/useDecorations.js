@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  query,
+  orderBy,
+} from "firebase/firestore";
 import { db } from "@/firebase";
 
 export const useDecorations = () => {
@@ -11,36 +17,21 @@ export const useDecorations = () => {
     const fetchDecorations = async () => {
       try {
         setLoading(true);
+        // Create a query to order by dateCreated descending
         const decorationsCollection = collection(db, "decorations");
-        const decorationSnapshot = await getDocs(decorationsCollection);
-
-        const decorationsData = await Promise.all(
-          decorationSnapshot.docs.map(async (decorationDoc) => {
-            const decorationData = decorationDoc.data();
-
-            // Fetch leader's name if not already included
-            if (decorationData.leaderID && !decorationData.leaderName) {
-              try {
-                const leaderDoc = await getDoc(
-                  doc(db, "users", decorationData.leaderID)
-                );
-                if (leaderDoc.exists()) {
-                  const leaderData = leaderDoc.data();
-                  decorationData.leaderName = leaderData.name;
-                }
-              } catch (err) {
-                console.error("Error fetching leader data:", err);
-              }
-            }
-
-            return {
-              id: decorationDoc.id,
-              ...decorationData,
-            };
-          })
+        const decorationsQuery = query(
+          decorationsCollection,
+          orderBy("dateCreated", "asc")
         );
+        const decorationSnapshot = await getDocs(decorationsQuery);
 
-        // console.log("Fetched decorations:", decorationsData);
+        const decorationsData = decorationSnapshot.docs.map((decorationDoc) => {
+          const decorationData = decorationDoc.data();
+          return {
+            id: decorationDoc.id,
+            ...decorationData,
+          };
+        });
 
         setDecorations(decorationsData);
       } catch (err) {
@@ -60,9 +51,9 @@ export const useDecorations = () => {
 
   const addDecoration = async (decoration) => {
     try {
-      const decorationsCollection = collection(db, "decoration");
-      await addDoc(decorationsCollection, decoration);
-      setDecorations((prev) => [...prev, { ...decoration, id: decoration.id }]);
+      const decorationsCollection = collection(db, "decorations");
+      const docRef = await addDoc(decorationsCollection, decoration);
+      setDecorations((prev) => [{ ...decoration, id: docRef.id }, ...prev]);
     } catch (err) {
       console.error("Error adding decoration:", err);
       setError(err.message);

@@ -1,12 +1,26 @@
 "use client";
 import Header from "@/components/Header";
 import React, { useState, useRef, useEffect } from "react";
-import { addDoc, collection, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
 import { db } from "@/firebase";
 import { useClubs } from "@/hooks/useClubs";
 import { useDecorations } from "@/hooks/useDecorations";
 import useStateRef from "@/hooks/stateRef";
 import DecorationsPanel from "./levelEditor/DecorationsPanel";
+import {
+  IMAGES,
+  getHouseImage,
+  getDecorationImage,
+  DECORATIONS_TO_CHOOSE_FROM,
+  CANVAS_BACKGROUND_COLOR,
+  GAME_CONSTANTS,
+} from "@/config/images";
 
 const LevelEditor = () => {
   // Canvas references
@@ -19,8 +33,11 @@ const LevelEditor = () => {
   const [showForm, setShowForm] = useState(false);
   const [placementMode, setPlacementMode, placementModeRef] =
     useStateRef(false);
-  const [deleteDecorationMode, setDeleteDecorationMode, deleteDecorationModeRef] =
-    useStateRef(false);
+  const [
+    deleteDecorationMode,
+    setDeleteDecorationMode,
+    deleteDecorationModeRef,
+  ] = useStateRef(false);
 
   // Club form data
   const [clubData, setClubData] = useState({
@@ -31,7 +48,7 @@ const LevelEditor = () => {
     commitmentLevel: 3,
     house_image: 1,
     meetingTimes: [""],
-    images: [""],
+    images: [],
     members: [],
     pos_x: 0,
     pos_y: 0,
@@ -80,7 +97,7 @@ const LevelEditor = () => {
     scale: 0.166,
     state: "idle-down",
     lastDirection: "down",
-    frameDuration: 5,
+    frameDuration: 3,
     frameCounter: 5,
     frame: 0,
     currentFrame: [0, 0],
@@ -127,41 +144,23 @@ const LevelEditor = () => {
   });
 
   // Images
-  const imagesRef = useRef({
-    char: new Image(),
-    house1: new Image(),
-    house2: new Image(),
-    house3: new Image(),
-    house4: new Image(),
-    tree1: new Image(),
-    stones: new Image(),
-  });
+  const imagesRef = useRef(
+    Object.keys(IMAGES).reduce((acc, key) => {
+      acc[key] = new Image();
+      return acc;
+    }, {})
+  );
 
-  const decorationsToChooseFromRef = useRef([
-    {
-      name: "Tree",
-      image: 1,
-      imageUrl: "/art/decoration/tree1.png",
-    },
-    {
-      name: "Stones",
-      image: 2,
-      imageUrl: "/art/decoration/stones.png",
-    }
-  ]);
+  const decorationsToChooseFromRef = useRef(DECORATIONS_TO_CHOOSE_FROM);
 
   // Editing club state
   const [editingClub, setEditingClub, editingClubRef] = useStateRef(null);
 
   // Load images
   useEffect(() => {
-    imagesRef.current.char.src = "/art/spritesheet3.png";
-    imagesRef.current.house1.src = "/art/house/house1.png";
-    imagesRef.current.house2.src = "/art/house/house2.png";
-    imagesRef.current.house3.src = "/art/house/house3.png";
-    imagesRef.current.house4.src = "/art/house/house4.png";
-    imagesRef.current.tree1.src = "/art/decoration/tree1.png";
-    imagesRef.current.stones.src = "/art/decoration/stones.png";
+    Object.entries(IMAGES).forEach(([key, src]) => {
+      imagesRef.current[key].src = src;
+    });
   }, []);
 
   useEffect(() => {
@@ -258,24 +257,41 @@ const LevelEditor = () => {
             x:
               e.clientX -
               gameState.scroll.x -
-              getHouseImage(clubData.house_image).naturalWidth / 2,
+              getHouseImage(clubData.house_image, imagesRef)
+                .naturalWidth /
+                2,
             y:
               e.clientY -
               gameState.scroll.y -
-              getHouseImage(clubData.house_image).naturalHeight / 2,
+              getHouseImage(clubData.house_image, imagesRef)
+                .naturalHeight /
+                2,
           };
         } else if (selectedDecorationRef.current != null) {
+          console.log(
+            selectedDecorationRef.current,
+            getDecorationImage(
+              selectedDecorationRef.current.image,
+              imagesRef
+            ).naturalHeight
+          );
           gameState.previewPos = {
             x:
               e.clientX -
               gameState.scroll.x -
-              (getDecorationImage(decorationData.image).naturalWidth *
+              (getDecorationImage(
+                selectedDecorationRef.current.image,
+                imagesRef
+              ).naturalWidth *
                 decorationDataRef.current.scale) /
                 2,
             y:
               e.clientY -
               gameState.scroll.y -
-              (getDecorationImage(decorationData.image).naturalHeight *
+              (getDecorationImage(
+                selectedDecorationRef.current.image,
+                imagesRef
+              ).naturalHeight *
                 decorationDataRef.current.scale) /
                 2,
           };
@@ -313,26 +329,29 @@ const LevelEditor = () => {
       console.log(editingClubRef.current);
       if (deleteDecorationModeRef.current) {
         // draw a debugging circle where clicked
-        ctxRef.current.beginPath();
-        ctxRef.current.arc(clickX, clickY, 100, 0, Math.PI * 2);
-        ctxRef.current.fillStyle = "red";
-        ctxRef.current.fill();
-        ctxRef.current.closePath();
         console.log("clicked at", clickX, clickY);
         // Check if the click is on a decoration
         const clickedDecoration = decorationsStateRef.current.find(
           (decoration) =>
             clickX >= decoration.pos_x + gameStateRef.current.scroll.x &&
-            clickX <= decoration.pos_x + getDecorationImage(decoration.image).width * decoration.scale + gameStateRef.current.scroll.x &&
+            clickX <=
+              decoration.pos_x +
+                getDecorationImage(decoration.image, imagesRef).width *
+                  decoration.scale +
+                gameStateRef.current.scroll.x &&
             clickY >= decoration.pos_y + gameStateRef.current.scroll.y &&
-            clickY <= decoration.pos_y + getDecorationImage(decoration.image).height * decoration.scale + gameStateRef.current.scroll.y
+            clickY <=
+              decoration.pos_y +
+                getDecorationImage(decoration.image, imagesRef).height *
+                  decoration.scale +
+                gameStateRef.current.scroll.y
         );
         if (clickedDecoration) {
           // Remove decoration from Firebase
           const decorationId = clickedDecoration.id;
           const decorationRef = doc(db, "decorations", decorationId);
-          
-          deleteDoc(decorationRef)
+
+          deleteDoc(decorationRef);
 
           // Remove from local state
           const updatedDecorations = decorationsStateRef.current.filter(
@@ -388,16 +407,18 @@ const LevelEditor = () => {
           // push to Firestore
           const docId = await addDecorationToFirebase(newDec);
           // update local
-          const updated = [...decorationsStateRef.current, {...newDec, id: docId}];
+          const updated = [
+            ...decorationsStateRef.current,
+            { ...newDec, id: docId },
+          ];
           console.log("updated", updated);
           setDecorationsState(updated);
           decorationsStateRef.current = updated;
           // exit placement
-          setPlacementMode(false);
-          setSelectedDecoration(null);
+          // setPlacementMode(false);
+          // setSelectedDecoration(null);
           handleSetMessage(`${selectedDecorationRef.current.name} placed!`);
         } else {
-          console.log("im running away oh no");
           // Update clubData with position
           const newClubData = {
             ...clubData,
@@ -440,7 +461,7 @@ const LevelEditor = () => {
             commitmentLevel: clickedClub.commitmentLevel || 3,
             house_image: clickedClub.house_image || 1,
             meetingTimes: clickedClub.meetingTimes || [""],
-            images: clickedClub.images || [""],
+            images: clickedClub.images || [],
             members: clickedClub.members || [],
             pos_x: clickedClub.pos_x,
             pos_y: clickedClub.pos_y,
@@ -464,33 +485,12 @@ const LevelEditor = () => {
     }, duration);
   };
 
-  const getHouseImage = (house_index) => {
-    const images = imagesRef.current;
-    // Convert to number to ensure proper comparison (in case it comes as string from Firebase)
-    const index = Number(house_index);
-    if (index === 1) return images.house1;
-    if (index === 2) return images.house2;
-    if (index === 3) return images.house3;
-    if (index === 4) return images.house4;
-    return images.house1; // Default to house1
-  };
-
-  const getDecorationImage = (decoration_index) => {
-    const images = imagesRef.current;
-    // Convert to number to ensure proper comparison (in case it comes as string from Firebase)
-    const index = Number(decoration_index);
-    if (index === 1) return images.tree1;
-    if (index === 2) return images.stones;
-    return images.tree1; // Default to tree1
-  };
-
-  // Add this function after the getHouseImage function
   const isClickOnClub = (clickX, clickY) => {
     const gameState = gameStateRef.current;
     const clubs = clubsStateRef.current;
 
     for (const club of clubs) {
-      const houseImg = getHouseImage(club.house_image);
+      const houseImg = getHouseImage(club.house_image, imagesRef);
       if (!houseImg || !houseImg.complete) continue;
 
       const clubX = club.pos_x + gameState.scroll.x;
@@ -499,9 +499,9 @@ const LevelEditor = () => {
       // Check if click is within the house image bounds
       if (
         clickX >= clubX &&
-        clickX <= clubX + houseImg.width &&
+        clickX <= clubX + houseImg.naturalWidth &&
         clickY >= clubY &&
-        clickY <= clubY + houseImg.height
+        clickY <= clubY + houseImg.naturalHeight
       ) {
         return club;
       }
@@ -655,7 +655,10 @@ const LevelEditor = () => {
         console.warn("Skipping invalid decoration:", decoration);
         continue;
       }
-      const decorationImg = getDecorationImage(decoration.image);
+      const decorationImg = getDecorationImage(
+        decoration.image,
+        imagesRef
+      );
       // Skip if image isn't loaded
       if (!decorationImg || !decorationImg.complete) {
         console.warn("Decoration image not ready:", decoration.image);
@@ -668,21 +671,46 @@ const LevelEditor = () => {
         // rotate first
         ctx.save();
         ctx.translate(
-          decoration.pos_x + gameState.scroll.x + decorationImg.width / 2,
-          decoration.pos_y + gameState.scroll.y + decorationImg.height / 2
+          decoration.pos_x +
+            gameState.scroll.x +
+            decorationImg.naturalWidth / 2,
+          decoration.pos_y +
+            gameState.scroll.y +
+            decorationImg.naturalHeight / 2
         );
         ctx.scale(shouldFlip, 1);
         ctx.rotate((decoration.rotation * Math.PI) / 180);
         ctx.translate(
-          -(decoration.pos_x + gameState.scroll.x + decorationImg.width / 2),
-          -(decoration.pos_y + gameState.scroll.y + decorationImg.height / 2)
+          -(
+            decoration.pos_x +
+            gameState.scroll.x +
+            decorationImg.naturalWidth / 2
+          ),
+          -(
+            decoration.pos_y +
+            gameState.scroll.y +
+            decorationImg.naturalHeight / 2
+          )
         );
+        // Draw a red rectangle around each decoration if in deleting mode
+        if (deleteDecorationModeRef.current) {
+          ctx.save();
+          ctx.strokeStyle = "red";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(
+            decoration.pos_x + gameState.scroll.x,
+            decoration.pos_y + gameState.scroll.y,
+            decorationImg.naturalWidth * decoration.scale,
+            decorationImg.naturalHeight * decoration.scale
+          );
+          ctx.restore();
+        }
         ctx.drawImage(
           decorationImg,
           decoration.pos_x + gameState.scroll.x,
           decoration.pos_y + gameState.scroll.y,
-          decorationImg.width * decoration.scale * shouldFlip,
-          decorationImg.height * decoration.scale
+          decorationImg.naturalWidth * decoration.scale * shouldFlip,
+          decorationImg.naturalHeight * decoration.scale
         );
         ctx.restore();
       } catch (err) {
@@ -715,7 +743,7 @@ const LevelEditor = () => {
         continue;
       }
 
-      const houseImg = getHouseImage(club.house_image);
+      const houseImg = getHouseImage(club.house_image, imagesRef);
 
       // Skip if image isn't loaded
       if (!houseImg || !houseImg.complete) {
@@ -739,11 +767,11 @@ const LevelEditor = () => {
   }
 
   function drawHousePreview() {
-    if (!placementMode) return;
+    if (!placementMode || editingClubRef.current == null) return;
 
     const ctx = ctxRef.current;
     const gameState = gameStateRef.current;
-    const houseImg = getHouseImage(clubData.house_image);
+    const houseImg = getHouseImage(clubData.house_image, imagesRef.current);
 
     if (!ctx || !houseImg || !houseImg.complete) return;
 
@@ -755,6 +783,58 @@ const LevelEditor = () => {
       gameState.previewPos.y + gameState.scroll.y
     );
     ctx.globalAlpha = 1.0;
+  }
+
+  // Draw a preview of the decoration being placed
+  function drawDecorationPreview() {
+    if (!placementModeRef.current || selectedDecorationRef.current == null)
+      return;
+
+    const ctx = ctxRef.current;
+    const gameState = gameStateRef.current;
+    const decoration = selectedDecorationRef.current;
+    const decorationData = decorationDataRef.current;
+    const decorationImg = getDecorationImage(
+      decoration.image,
+      imagesRef
+    );
+
+    if (!ctx || !decorationImg || !decorationImg.complete) return;
+
+    const shouldFlip = decorationData.flip ? -1 : 1;
+    ctx.save();
+    ctx.globalAlpha = 0.7;
+    ctx.translate(
+      gameState.previewPos.x +
+        gameState.scroll.x +
+        (decorationImg.naturalWidth * decorationData.scale) / 2,
+      gameState.previewPos.y +
+        gameState.scroll.y +
+        (decorationImg.naturalHeight * decorationData.scale) / 2
+    );
+    ctx.scale(shouldFlip, 1);
+    ctx.rotate((decorationData.rotation * Math.PI) / 180);
+    ctx.translate(
+      -(
+        gameState.previewPos.x +
+        gameState.scroll.x +
+        (decorationImg.naturalWidth * decorationData.scale) / 2
+      ),
+      -(
+        gameState.previewPos.y +
+        gameState.scroll.y +
+        (decorationImg.naturalHeight * decorationData.scale) / 2
+      )
+    );
+    ctx.drawImage(
+      decorationImg,
+      gameState.previewPos.x + gameState.scroll.x,
+      gameState.previewPos.y + gameState.scroll.y,
+      decorationImg.naturalWidth * decorationData.scale * shouldFlip,
+      decorationImg.naturalHeight * decorationData.scale
+    );
+    ctx.globalAlpha = 1.0;
+    ctx.restore();
   }
 
   function drawPlayer() {
@@ -784,7 +864,7 @@ const LevelEditor = () => {
 
     if (!ctx || !canvas) return;
 
-    ctx.fillStyle = "#B3DAAA";
+    ctx.fillStyle = CANVAS_BACKGROUND_COLOR;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
@@ -794,6 +874,7 @@ const LevelEditor = () => {
     drawClubs(); // Will use clubsStateRef.current
     drawDecorations(); // Will use decorationsStateRef.current
     drawHousePreview();
+    drawDecorationPreview();
     drawPlayer();
     stateHandler();
     animationHandler();
@@ -1267,7 +1348,10 @@ const LevelEditor = () => {
         setDecorationData={setDecorationData}
         deleteDecorationMode={deleteDecorationMode}
         setDeleteDecorationMode={setDeleteDecorationMode}
+        setPlacementMode={setPlacementMode}
+        setSelectedDecoration={setSelectedDecoration}
         onSelect={(dec) => {
+          console.log(dec);
           setSelectedDecoration(dec);
           setPlacementMode(true);
           handleSetMessage(`Click on the map to place ${dec.name}`);
@@ -1275,7 +1359,7 @@ const LevelEditor = () => {
       />
 
       {/* Instructions */}
-      <div className="fixed top-16 left-4 bg-white p-3 rounded-lg border-2 border-green-800 shadow-md">
+      <div className="fixed top-16 text-black left-4 bg-white p-3 rounded-lg border-2 border-green-800 shadow-md">
         <h3 className="font-bold text-green-800 mb-2">Controls:</h3>
         <ul className="text-sm space-y-1">
           <li>🡑 🡓 🡐 🡒 : Move around map</li>

@@ -7,6 +7,8 @@ const DecorationsPanel = ({
   setDecorationData,
   deleteDecorationMode,
   setDeleteDecorationMode,
+  setPlacementMode,
+  setSelectedDecoration,
   onSelect,
 }) => {
   const [scale, setScale] = React.useState(1);
@@ -34,9 +36,9 @@ const DecorationsPanel = ({
   }, [scale, flip, rotation]);
 
   return (
-    <div className="fixed top-20 right-4 bg-white p-4 rounded shadow-lg max-h-[80vh] overflow-y-auto">
+    <div className="fixed w-64 top-5 right-4 bg-white p-4 text-black rounded shadow-lg h-[80vh]">
       <h3 className="font-bold mb-2">Decorations</h3>
-      <ul className="space-y-2">
+      <ul className="space-y-2 max-h-[47vh] overflow-y-auto">
         {decorations.map((dec, i) => (
           <li key={i}>
             <button
@@ -56,29 +58,32 @@ const DecorationsPanel = ({
         ))}
       </ul>
       {/* inputs for scale, flip and rotation */}
-      <div className="mt-4">
-        <label className="block mb-2">Scale - {scale}</label>
+      <div className="mt-4 absolute bottom-0 left-0 right-0 p-3">
+        <label className="block">Scale - {scale}</label>
         <input
           type="range"
           min={0.1}
           max={3}
-          step={0.1}
+          step={0.01}
           value={scale}
           onChange={(e) => setScale(e.target.value)}
           className="border rounded p-1 w-full"
         />
-        <label className="block mb-2 mt-4">Flip</label>
-        <input
-          type="checkbox"
-          checked={flip}
-          onChange={(e) => setFlip(e.target.checked)}
-          className="mr-2"
-        />
-        <label className="block mb-2 mt-4">Rotation - {rotation}</label>
+        <div className="flex gap-3 items-center">
+          <label className="block mb-2">Flip</label>
+          <input
+            type="checkbox"
+            checked={flip}
+            onChange={(e) => setFlip(e.target.checked)}
+            className="mr-2"
+          />
+        </div>
+
+        <label className="block mb-2">Rotation - {rotation}</label>
         <input
           type="range"
-          min={0}
-          max={360}
+          min={-180}
+          max={180}
           step={1}
           value={rotation}
           onChange={(e) => setRotation(e.target.value)}
@@ -86,7 +91,11 @@ const DecorationsPanel = ({
         />
         <button
           className="mt-4 bg-red-500 text-white p-2 rounded hover:bg-red-600"
-          onClick={() => setDeleteDecorationMode(!deleteDecorationMode)}
+          onClick={() => {
+            setDeleteDecorationMode(!deleteDecorationMode);
+            setPlacementMode(false);
+            setSelectedDecoration(null);
+          }}
         >
           {deleteDecorationMode ? "Cancel" : "Delete Decoration"}
         </button>

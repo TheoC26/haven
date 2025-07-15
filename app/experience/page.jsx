@@ -12,6 +12,13 @@ import { useDecorations } from "@/hooks/useDecorations";
 import { useClubs } from "@/hooks/useClubs";
 import React, { useState, useRef, useEffect } from "react";
 import useStateRef from "@/hooks/stateRef";
+import {
+  IMAGES,
+  getHouseImage,
+  getDecorationImage,
+  CANVAS_BACKGROUND_COLOR,
+  GAME_CONSTANTS,
+} from "@/config/images";
 
 const Experience = () => {
   // Canvas references
@@ -41,21 +48,25 @@ const Experience = () => {
   // Player state (moved from direct variables to state refs to persist across renders)
   const playerStateRef = useRef({
     position: {
-      x: window.innerWidth / 2 - (391 * 0.166) / 2,
-      y: window.innerHeight / 2 - (908 * 0.166) / 2,
+      x:
+        window.innerWidth / 2 -
+        (GAME_CONSTANTS.PLAYER_WIDTH * GAME_CONSTANTS.PLAYER_SCALE) / 2,
+      y:
+        window.innerHeight / 2 -
+        (GAME_CONSTANTS.PLAYER_HEIGHT * GAME_CONSTANTS.PLAYER_SCALE) / 2,
     },
-    speed: 5,
-    diagonalSpeed: Math.sqrt(Math.pow(5, 2) / 2),
-    currentSpeed: 5,
+    speed: GAME_CONSTANTS.PLAYER_SPEED,
+    diagonalSpeed: GAME_CONSTANTS.PLAYER_DIAGONAL_SPEED,
+    currentSpeed: GAME_CONSTANTS.PLAYER_SPEED,
     directions: {
       up: false,
       down: false,
       left: false,
       right: false,
     },
-    width: 391,
-    height: 908,
-    scale: 0.166,
+    width: GAME_CONSTANTS.PLAYER_WIDTH,
+    height: GAME_CONSTANTS.PLAYER_HEIGHT,
+    scale: GAME_CONSTANTS.PLAYER_SCALE,
     state: "idle-down",
     lastDirection: "down",
     frameDuration: 5,
@@ -107,28 +118,13 @@ const Experience = () => {
   });
 
   // Images
-  const imagesRef = useRef({
-    char: new Image(),
-    house1: new Image(),
-    house2: new Image(),
-    house3: new Image(),
-    house4: new Image(),
-    tree1: new Image(),
-    stones: new Image(),
-  });
+  const imagesRef = useRef(
+    Object.keys(IMAGES).reduce((acc, key) => {
+      acc[key] = new Image();
+      return acc;
+    }, {})
+  );
 
-  const decorationsToChooseFromRef = useRef([
-    {
-      name: "Tree",
-      image: 1,
-      imageUrl: "/art/decoration/tree1.png",
-    },
-    {
-      name: "Stones",
-      image: 2,
-      imageUrl: "/art/decoration/stones.png",
-    },
-  ]);
 
   // Get auth and club data
   const { user, checkUserExists } = useAuth();
@@ -137,13 +133,9 @@ const Experience = () => {
 
   // Load images
   useEffect(() => {
-    imagesRef.current.char.src = "/art/spritesheet3.png";
-    imagesRef.current.house1.src = "/art/house/house1.png";
-    imagesRef.current.house2.src = "/art/house/house2.png";
-    imagesRef.current.house3.src = "/art/house/house3.png";
-    imagesRef.current.house4.src = "/art/house/house4.png";
-    imagesRef.current.tree1.src = "/art/decoration/tree1.png";
-    imagesRef.current.stones.src = "/art/decoration/stones.png";
+    Object.entries(IMAGES).forEach(([key, src]) => {
+      imagesRef.current[key].src = src;
+    });
   }, []);
 
   // Check if first visit to show greeting
@@ -229,23 +221,11 @@ const Experience = () => {
     };
   }, [loadingClubs, clubsState]);
 
-  const getHouseImage = (house_index) => {
-    const images = imagesRef.current;
-    if (house_index === 1) return images.house1;
-    if (house_index === 2) return images.house2;
-    if (house_index === 3) return images.house3;
-    if (house_index === 4) return images.house4;
-    return null;
-  };
-
-  const getDecorationImage = (decoration_index) => {
-    const images = imagesRef.current;
-    // Convert to number to ensure proper comparison (in case it comes as string from Firebase)
-    const index = Number(decoration_index);
-    if (index === 1) return images.tree1;
-    if (index === 2) return images.stones;
-    return images.tree1; // Default to tree1
-  };
+  // Use shared helper functions
+  const getHouseImageLocal = (house_index) =>
+    getHouseImage(house_index, imagesRef);
+  const getDecorationImageLocal = (decoration_index) =>
+    getDecorationImage(decoration_index, imagesRef);
 
   // Handler functions
   const handleLoginClick = () => {
@@ -377,8 +357,8 @@ const Experience = () => {
     const clubRect = {
       x: closestClub.pos_x + 50,
       y: closestClub.pos_y + 200,
-      width: getHouseImage(closestClub.house_image).naturalWidth - 100,
-      height: getHouseImage(closestClub.house_image).naturalHeight - 250,
+      width: getHouseImage(closestClub.house_image, imagesRef).naturalWidth - 100,
+      height: getHouseImage(closestClub.house_image, imagesRef).naturalHeight - 250,
     };
     const offset = 10; // Adjust this value as needed
     if (direction === "up") {
@@ -390,7 +370,7 @@ const Experience = () => {
     } else if (direction === "right") {
       playerRect.x += offset;
     }
-    console.log("Player Rect:", playerRect, "Club Rect:", clubRect);
+    // console.log("Player Rect:", playerRect, "Club Rect:", clubRect);
     return (
       playerRect.x < clubRect.x + clubRect.width &&
       playerRect.x + playerRect.width > clubRect.x &&
@@ -432,70 +412,83 @@ const Experience = () => {
     }
   }
 
-  function drawDecorations() {
+  // Helper to check if an object is on screen
+  function isOnScreen(objX, objY, objWidth, objHeight, scroll, canvas) {
+    const x = objX + scroll.x;
+    const y = objY + scroll.y;
+    return (
+      x + objWidth > 0 &&
+      x < canvas.width &&
+      y + objHeight > 0 &&
+      y < canvas.height
+    );
+  }
+
+  // Draw decorations behind or in front of the player
+  function drawDecorationsLayered(playerY, drawInFront) {
     const ctx = ctxRef.current;
     const gameState = gameStateRef.current;
     const player = playerStateRef.current;
-
-    // Use decorationsStateRef.current to ensure we have the latest data
     const decorations = decorationsStateRef.current;
-    if (!decorations || !decorations.length || !ctx) return;
+    const canvas = canvasRef.current;
+    if (!decorations || !decorations.length || !ctx || !canvas) return;
 
-    // Debug to confirm we have decorations to draw
-
-    let shortestDistance = Infinity;
-    // console.log("Drawing decorations:", decorations.length);
     for (const decoration of decorations) {
-      // Skip if missing required properties
       if (
         !decoration ||
         typeof decoration.image === "undefined" ||
         typeof decoration.pos_x === "undefined" ||
         typeof decoration.pos_y === "undefined"
       ) {
-        console.warn("Skipping invalid decoration:", decoration);
         continue;
       }
-      const decorationImg = getDecorationImage(decoration.image);
-      // Skip if image isn't loaded
-      if (!decorationImg || !decorationImg.complete) {
-        console.warn("Decoration image not ready:", decoration.image);
+      const decorationImg = getDecorationImageLocal(decoration.image);
+      if (!decorationImg || !decorationImg.complete) continue;
+      const decY = decoration.pos_y;
+      const decHeight = decorationImg.height * decoration.scale;
+      // Only draw if on screen
+      if (
+        !isOnScreen(
+          decoration.pos_x,
+          decoration.pos_y,
+          decorationImg.width * decoration.scale,
+          decHeight,
+          gameState.scroll,
+          canvas
+        )
+      )
         continue;
-      }
 
-      if (decoration.name != "Stones") {
-        const distance = Math.sqrt(
-          Math.pow(
-            player.position.x +
-              (player.width * player.scale) / 2 -
-              (decoration.pos_x + decorationImg.naturalWidth / 2),
-            2
-          ) +
-            Math.pow(
-              player.position.y +
-                (player.height * player.scale) / 2 -
-                (decoration.pos_y + decorationImg.naturalHeight / 2),
-              2
-            )
+      if (decoration.name.includes("Stone") && drawInFront == false) {
+        const shouldFlip = decoration.flip ? -1 : 1;
+        ctx.save();
+        ctx.translate(
+          decoration.pos_x + gameState.scroll.x + decorationImg.width / 2,
+          decoration.pos_y + gameState.scroll.y + decorationImg.height / 2
         );
-
-        if (distance < shortestDistance) {
-          shortestDistance = distance;
-          gameState.closestDecoration = decoration;
-          // setClosestDecorationState(decoration);
-          if (distance < 275) {
-            gameState.closeEnoughDecoration = true;
-          } else {
-            gameState.closeEnoughDecoration = false;
-          }
-        }
+        ctx.scale(shouldFlip, 1);
+        ctx.rotate((decoration.rotation * Math.PI) / 180);
+        ctx.translate(
+          -(decoration.pos_x + gameState.scroll.x + decorationImg.width / 2),
+          -(decoration.pos_y + gameState.scroll.y + decorationImg.height / 2)
+        );
+        ctx.drawImage(
+          decorationImg,
+          decoration.pos_x + gameState.scroll.x,
+          decoration.pos_y + gameState.scroll.y,
+          decorationImg.width * decoration.scale * shouldFlip,
+          decorationImg.height * decoration.scale
+        );
+        ctx.restore();
       }
-
-      // Debug position values
-      // console.log(`Drawing decoration at: ${decoration.pos_x + gameState.scroll.x}, ${decoration.pos_y + gameState.scroll.y}`);
+      // Layer logic: drawInFront = true means draw only if below player
+      const shouldDraw = drawInFront
+        ? playerY + player.height * player.scale < decY + decHeight
+        : playerY + player.height * player.scale >= decY + decHeight;
+      if (!shouldDraw || decoration.name.includes("Stone")) continue;
+      // Draw
       try {
         const shouldFlip = decoration.flip ? -1 : 1;
-        // rotate first
         ctx.save();
         ctx.translate(
           decoration.pos_x + gameState.scroll.x + decorationImg.width / 2,
@@ -516,126 +509,45 @@ const Experience = () => {
         );
         ctx.restore();
       } catch (err) {
-        console.error("Error drawing decoration:", err, decoration);
+        // Ignore draw errors
       }
     }
   }
 
-  function drawClubs() {
+  // Draw clubs behind or in front of the player
+  function drawClubsLayered(playerY, drawInFront) {
     const ctx = ctxRef.current;
     const gameState = gameStateRef.current;
     const player = playerStateRef.current;
     const images = imagesRef.current;
-
-    if (!clubsState || !ctx) return;
-
-    let shortestDistance = Infinity;
-
+    const canvas = canvasRef.current;
+    if (!clubsState || !ctx || !canvas) return;
     for (const club of clubsState) {
-      // Use house1 image as default if club.house_image is undefined
-      const houseImg = getHouseImage(club.house_image) || images.house1;
-
-      const distance = Math.sqrt(
-        Math.pow(
-          player.position.x +
-            (player.width * player.scale) / 2 -
-            (club.pos_x + houseImg.naturalWidth / 2),
-          2
-        ) +
-          Math.pow(
-            player.position.y +
-              (player.height * player.scale) / 2 -
-              (club.pos_y + houseImg.naturalHeight / 2),
-            2
-          )
-      );
-
-      if (distance < shortestDistance) {
-        shortestDistance = distance;
-        gameState.closestClub = club;
-        setClosestClubState(club);
-
-        if (distance < 275) {
-          gameState.closeEnough = true;
-          setIsCloseEnoughToClub(true);
-          setMessage(`Enter ${club.name} club`);
-        } else {
-          gameState.closeEnough = false;
-          setIsCloseEnoughToClub(false);
-        }
-      }
-
+      const houseImg = getHouseImageLocal(club.house_image) || images.house1;
+      if (!houseImg || !houseImg.complete) continue;
+      const clubY = club.pos_y;
+      const clubHeight = houseImg.naturalHeight;
+      // Only draw if on screen
+      if (
+        !isOnScreen(
+          club.pos_x,
+          club.pos_y,
+          houseImg.naturalWidth,
+          clubHeight,
+          gameState.scroll,
+          canvas
+        )
+      )
+        continue;
+      // Layer logic: drawInFront = true means draw only if below player
+      const shouldDraw = drawInFront
+        ? playerY < clubY + clubHeight / 4
+        : playerY >= clubY + clubHeight / 4;
+      if (!shouldDraw) continue;
       ctx.drawImage(
         houseImg,
         club.pos_x + gameState.scroll.x,
         club.pos_y + gameState.scroll.y
-      );
-    }
-  }
-
-  function drawClosestDecoration() {
-    const ctx = ctxRef.current;
-    const gameState = gameStateRef.current;
-    const player = playerStateRef.current;
-    const images = imagesRef.current;
-
-    if (!gameState.closestDecoration || !ctx) return;
-    const closestDecoration = gameState.closestDecoration;
-    const decorationImg = getDecorationImage(closestDecoration.image);
-    if (!decorationImg) return;
-    if (
-      player.position.y <
-      closestDecoration.pos_y +
-        (decorationImg.naturalHeight * closestDecoration.scale) / 2
-    ) {
-      const shouldFlip = closestDecoration.flip ? -1 : 1;
-      // rotate first
-      ctx.save();
-      ctx.translate(
-        closestDecoration.pos_x + gameState.scroll.x + decorationImg.width / 2,
-        closestDecoration.pos_y + gameState.scroll.y + decorationImg.height / 2
-      );
-      ctx.scale(shouldFlip, 1);
-      ctx.rotate((closestDecoration.rotation * Math.PI) / 180);
-      ctx.translate(
-        -(
-          closestDecoration.pos_x +
-          gameState.scroll.x +
-          decorationImg.width / 2
-        ),
-        -(
-          closestDecoration.pos_y +
-          gameState.scroll.y +
-          decorationImg.height / 2
-        )
-      );
-      ctx.drawImage(
-        decorationImg,
-        closestDecoration.pos_x + gameState.scroll.x,
-        closestDecoration.pos_y + gameState.scroll.y,
-        decorationImg.width * closestDecoration.scale * shouldFlip,
-        decorationImg.height * closestDecoration.scale
-      );
-      ctx.restore();
-    }
-  }
-
-  function drawClosestClub() {
-    const ctx = ctxRef.current;
-    const gameState = gameStateRef.current;
-    const player = playerStateRef.current;
-    const images = imagesRef.current;
-
-    if (!gameState.closestClub || !ctx) return;
-
-    const closestClub = gameState.closestClub;
-    const houseImg = getHouseImage(closestClub.house_image) || images.house1;
-
-    if (player.position.y < closestClub.pos_y + houseImg.naturalHeight / 4) {
-      ctx.drawImage(
-        houseImg,
-        closestClub.pos_x + gameState.scroll.x,
-        closestClub.pos_y + gameState.scroll.y
       );
     }
   }
@@ -667,18 +579,54 @@ const Experience = () => {
 
     if (!ctx || !canvas) return;
 
-    ctx.fillStyle = "#B3DAAA";
+    ctx.fillStyle = CANVAS_BACKGROUND_COLOR;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
+  // Find and set the closest club to the player
+  function updateClosestClub() {
+    const player = playerStateRef.current;
+    let minDist = Infinity;
+    let closest = null;
+    for (const club of clubsState) {
+      const houseImg =
+        getHouseImage(club.house_image) || imagesRef.current.house1;
+      if (!houseImg || !houseImg.complete) continue;
+      // Use center of player and club for distance
+      const px = player.position.x + (player.width * player.scale) / 2;
+      const py = player.position.y + (player.height * player.scale) / 2;
+      const cx = club.pos_x + houseImg.naturalWidth / 2;
+      const cy = club.pos_y + houseImg.naturalHeight / 2;
+      const dist = Math.sqrt((px - cx) ** 2 + (py - cy) ** 2);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = club;
+        if (dist < GAME_CONSTANTS.CLUB_INTERACTION_DISTANCE) {
+          gameStateRef.closeEnough = true;
+          setIsCloseEnoughToClub(true);
+          setMessage(`Enter ${club.name}`);
+        } else {
+          gameStateRef.closeEnough = false;
+          setIsCloseEnoughToClub(false);
+        }
+      }
+    }
+    gameStateRef.current.closestClub = closest;
+    setClosestClubState(closest);
+  }
+
   function updateCanvas() {
+    updateClosestClub();
     clearCanvas();
     updatePlayerPosition();
-    drawClubs();
-    drawDecorations();
+    // Draw all decorations and clubs behind the player
+    drawClubsLayered(playerStateRef.current.position.y, false);
+    drawDecorationsLayered(playerStateRef.current.position.y, false);
+    // Draw player
     drawPlayer();
-    drawClosestClub();
-    drawClosestDecoration();
+    // Draw all decorations and clubs in front of the player
+    drawClubsLayered(playerStateRef.current.position.y, true);
+    drawDecorationsLayered(playerStateRef.current.position.y, true);
     stateHandler();
     animationHandler();
   }
