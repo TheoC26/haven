@@ -4,7 +4,10 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 
 // Admin IDs - in a real app, this would be stored in Firestore or environment variables
-const ADMIN_IDS = ["LOYLdbBW7LXUFtddSy28Ag1PEhM2"]; // Replace with actual admin user IDs
+const ADMIN_IDS = [
+  "LOYLdbBW7LXUFtddSy28Ag1PEhM2",
+  "aPNnpioL7YVt1IQxR94Vdvm2TpI2",
+]; // Replace with actual admin user IDs
 
 export const useAdmin = () => {
   const { user } = useAuth();

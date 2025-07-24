@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Cabin_Sketch, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/hooks/useAuth";
 
@@ -12,6 +12,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const cabinSketch = Cabin_Sketch({
+  variable: "--font-cabin-sketch",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+})
+
 export const metadata = {
   title: "Digital Haven",
   description: "A community for online clubs",
@@ -21,7 +27,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased vsc-initialized`}
+        className={`${cabinSketch.variable} antialiased vsc-initialized`}
       >
         <AuthProvider>{children}</AuthProvider>
       </body>
