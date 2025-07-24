@@ -111,12 +111,12 @@ const ApplyModal = ({ isOpen, onClose, clubId }) => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative bg-[#AF6E45] border-8 border-[#A3643C] rounded-2xl shadow-2xl shadow-[#AF6E45] max-w-md w-full max-h-[80vh] overflow-auto"
+              className="relative bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[70vh] overflow-visable"
             >
               {/* Close button */}
               <button
                 onClick={handleClose}
-                className="absolute right-4 top-4 text-[#7E4C2C] transition-all hover:text-yellow-600 cursor-pointer"
+                className="absolute right-4 top-4 bg-white rounded-bl-xl p-2 text-[#53674F] transition-all hover:text-[#53674F]/90 cursor-pointer"
               >
                 <svg
                   className="w-6 h-6"
@@ -134,14 +134,14 @@ const ApplyModal = ({ isOpen, onClose, clubId }) => {
               </button>
 
               {/* Header */}
-              <div className="p-6 border-b-4 border-[#6A3C1F]">
-                <Dialog.Title className="text-2xl font-bold text-[#6A3C1F] text-center">
+              <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white p-4 px-12 rounded-t-2xl">
+                <Dialog.Title className="text-2xl font-semibold text-[#53674F] text-center">
                   {success ? "Application Submitted!" : "Apply to Join Club"}
                 </Dialog.Title>
               </div>
 
               {/* Body */}
-              <div className="p-6">
+              <div className="p-6 space-y-6 pt-16">
                 {success ? (
                   <div className="text-center space-y-4">
                     <svg
@@ -157,20 +157,17 @@ const ApplyModal = ({ isOpen, onClose, clubId }) => {
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-
-                    <h3 className="text-xl font-semibold text-[#6A3C1F]">
+                    <h3 className="text-xl font-semibold text-[#53674F]">
                       Thank You!
                     </h3>
-
-                    <p className="text-[#6A3C1F]">
+                    <p className="text-[#53674F]">
                       Your application has been successfully submitted. The club
                       leader will review your application and get back to you
                       soon.
                     </p>
-
                     <button
                       onClick={handleClose}
-                      className="mt-4 w-full bg-[#6A3C1F] text-white py-2 px-4 rounded-lg hover:bg-[#8B6B4F] transition-colors duration-200"
+                      className="mt-4 w-full bg-[#53674F] text-white py-3 px-4 rounded-lg hover:bg-[#53674F]/90 transition-colors duration-200 font-semibold text-lg"
                     >
                       Close
                     </button>
@@ -247,7 +244,7 @@ const ApplyModal = ({ isOpen, onClose, clubId }) => {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-[#6A3C1F] text-white py-2 px-4 rounded-lg hover:bg-[#8B6B4F] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full bg-[#53674F] text-white py-3 px-4 rounded-lg hover:bg-[#53674F]/90 transition-colors duration-200 font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loading ? "Submitting..." : "Submit Application"}
                     </button>

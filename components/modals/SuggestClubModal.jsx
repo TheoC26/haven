@@ -80,7 +80,7 @@ const SuggestClubModal = ({ isOpen, onClose }) => {
           exit={{ opacity: 0 }}
           open={isOpen}
           onClose={handleClose}
-          className="relative z-50 text-[#7E4C2C]"
+          className="relative z-50 text-[#53674F]"
         >
           {/* Backdrop */}
           <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
@@ -92,12 +92,12 @@ const SuggestClubModal = ({ isOpen, onClose }) => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative bg-[#AF6E45] border-8 border-[#A3643C] rounded-2xl shadow-2xl shadow-[#AF6E45] max-w-md w-full max-h-[80vh] overflow-auto"
+              className="relative bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[70vh] overflow-visable"
             >
               {/* Close button */}
               <button
                 onClick={handleClose}
-                className="absolute right-4 top-4 text-[#7E4C2C] transition-all hover:text-yellow-600 cursor-pointer"
+                className="absolute right-4 top-4 bg-white rounded-bl-xl p-2 text-[#53674F] transition-all hover:text-[#53674F]/90 cursor-pointer"
               >
                 <svg
                   className="w-6 h-6"
@@ -113,16 +113,15 @@ const SuggestClubModal = ({ isOpen, onClose }) => {
                   />
                 </svg>
               </button>
-
               {/* Header */}
-              <div className="p-6 border-b-4 border-[#6A3C1F]">
-                <Dialog.Title className="text-2xl font-bold text-[#6A3C1F] text-center">
+              <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white p-4 px-12 rounded-t-2xl">
+                <Dialog.Title className="text-2xl font-semibold text-[#53674F] text-center">
                   {success ? "Club Suggested!" : "Suggest a New Club"}
                 </Dialog.Title>
               </div>
 
               {/* Body */}
-              <div className="p-6">
+              <div className="p-6 space-y-6 pt-16">
                 {success ? (
                   <div className="text-center space-y-4">
                     <svg
@@ -138,20 +137,17 @@ const SuggestClubModal = ({ isOpen, onClose }) => {
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-
-                    <h3 className="text-xl font-semibold text-[#6A3C1F]">
+                    <h3 className="text-xl font-semibold text-[#53674F]">
                       Thank You for Your Suggestion!
                     </h3>
-
-                    <p className="text-[#6A3C1F]">
+                    <p className="text-[#53674F]">
                       Your club suggestion has been submitted successfully. Our
                       admins will review it and may reach out to you for more
                       information.
                     </p>
-
                     <button
                       onClick={handleClose}
-                      className="mt-4 w-full bg-[#6A3C1F] text-white py-2 px-4 rounded-lg hover:bg-[#8B6B4F] transition-colors duration-200"
+                      className="mt-4 w-full bg-[#53674F] text-white py-3 px-4 rounded-lg hover:bg-[#53674F]/90 transition-colors duration-200 font-semibold text-lg"
                     >
                       Close
                     </button>
@@ -159,7 +155,7 @@ const SuggestClubModal = ({ isOpen, onClose }) => {
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-[#6A3C1F] mb-1">
+                      <label className="block text-sm font-medium text-[#53674F] mb-1">
                         Club Name <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -167,12 +163,12 @@ const SuggestClubModal = ({ isOpen, onClose }) => {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         required
-                        className="w-full px-4 py-2 rounded-lg border border-[#6A3C1F] focus:outline-none focus:ring-2 focus:ring-[#A27B5C] bg-[#BE9871]"
+                        className="w-full px-4 py-2 rounded-lg border border-[#53674F] focus:outline-none focus:ring-2 focus:ring-[#53674F]"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-[#6A3C1F] mb-1">
+                      <label className="block text-sm font-medium text-[#53674F] mb-1">
                         Description <span className="text-red-500">*</span>
                       </label>
                       <textarea
@@ -180,57 +176,12 @@ const SuggestClubModal = ({ isOpen, onClose }) => {
                         onChange={(e) => setDescription(e.target.value)}
                         required
                         rows={4}
-                        className="w-full px-4 py-2 rounded-lg border border-[#6A3C1F] focus:outline-none focus:ring-2 focus:ring-[#A27B5C] bg-[#BE9871]"
+                        className="w-full px-4 py-2 rounded-lg border border-[#53674F] focus:outline-none focus:ring-2 focus:ring-[#53674F]"
                         placeholder="What is this club about? What activities would members do?"
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-[#6A3C1F] mb-1">
-                        Meeting Times (comma separated)
-                      </label>
-                      <input
-                        type="text"
-                        value={meetingTimes}
-                        onChange={(e) => setMeetingTimes(e.target.value)}
-                        placeholder="E.g. Mondays 7PM EST, Fridays 3PM EST"
-                        className="w-full px-4 py-2 rounded-lg border border-[#6A3C1F] focus:outline-none focus:ring-2 focus:ring-[#A27B5C] bg-[#BE9871]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-[#6A3C1F] mb-1">
-                        Communication Method
-                      </label>
-                      <input
-                        type="text"
-                        value={communicationMethod}
-                        onChange={(e) => setCommunicationMethod(e.target.value)}
-                        placeholder="E.g. Discord, Zoom, Slack"
-                        className="w-full px-4 py-2 rounded-lg border border-[#6A3C1F] focus:outline-none focus:ring-2 focus:ring-[#A27B5C] bg-[#BE9871]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-[#6A3C1F] mb-1">
-                        Commitment Level (1-5)
-                      </label>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="range"
-                          min="1"
-                          max="5"
-                          value={commitmentLevel}
-                          onChange={(e) => setCommitmentLevel(e.target.value)}
-                          className="w-full"
-                        />
-                        <span>{commitmentLevel}</span>
-                      </div>
-                      <div className="flex justify-between text-xs text-[#6A3C1F]/70 mt-1">
-                        <span>Low</span>
-                        <span>High</span>
-                      </div>
-                    </div>
+                    
 
                     {error && (
                       <div className="text-red-600 text-sm">{error}</div>
@@ -239,7 +190,7 @@ const SuggestClubModal = ({ isOpen, onClose }) => {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-[#6A3C1F] text-white py-2 px-4 rounded-lg hover:bg-[#8B6B4F] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full bg-[#53674F] text-white py-3 px-4 rounded-lg hover:bg-[#53674F]/90 transition-colors duration-200 font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loading ? "Submitting..." : "Submit Suggestion"}
                     </button>

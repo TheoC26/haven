@@ -10,7 +10,7 @@ const Header = ({ onInfoClick, onLoginClick, onProfileClick }) => {
       {/* Info button */}
       <button
         onClick={onInfoClick}
-        className="text-[#6A3C1F] hover:text-[#8B6B4F] transition-colors"
+        className="text-[#53674F] hover:text-[#808d7e] transition-colors"
         aria-label="Info"
       >
         <svg
@@ -31,14 +31,14 @@ const Header = ({ onInfoClick, onLoginClick, onProfileClick }) => {
 
       {/* Logo/Title (optional, could be added here) */}
       <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
-        <h1 className="text-2xl font-bold text-[#6A3C1F]">Digital Haven</h1>
+        <h1 className="text-2xl font-bold text-[#53674F]">Digital Haven</h1>
       </div>
 
       {/* Login/Profile button */}
       {user && !user.isAnonymous ? (
         <button
           onClick={onProfileClick}
-          className="text-[#6A3C1F] hover:text-[#8B6B4F] transition-colors flex items-center"
+          className="text-[#53674F] hover:text-[#808d7e] transition-colors flex items-center"
           aria-label="Profile"
         >
           <svg
@@ -59,7 +59,7 @@ const Header = ({ onInfoClick, onLoginClick, onProfileClick }) => {
       ) : (
         <button
           onClick={onLoginClick}
-          className="px-4 py-2 bg-[#6A3C1F] text-white rounded-lg hover:bg-[#8B6B4F] transition-colors"
+          className="px-4 cursor-pointer py-2 bg-[#53674F] text-white rounded-lg hover:bg-[#808d7e] transition-colors"
         >
           Login
         </button>

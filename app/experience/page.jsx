@@ -125,7 +125,6 @@ const Experience = () => {
     }, {})
   );
 
-
   // Get auth and club data
   const { user, checkUserExists } = useAuth();
   const { clubs, loading: loadingClubs } = useClubs();
@@ -187,7 +186,7 @@ const Experience = () => {
     handleResize();
 
     // Register event listeners
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", (e) => handleKeyDown(e, gameStateRef.current));
     window.addEventListener("keyup", handleKeyUp);
     window.addEventListener("resize", handleResize);
 
@@ -261,7 +260,7 @@ const Experience = () => {
   };
 
   // Keyboard input handlers
-  function handleKeyDown(event) {
+  function handleKeyDown(event, gameState) {
     const player = playerStateRef.current;
 
     if (event.code === "ArrowLeft") {
@@ -357,8 +356,10 @@ const Experience = () => {
     const clubRect = {
       x: closestClub.pos_x + 50,
       y: closestClub.pos_y + 200,
-      width: getHouseImage(closestClub.house_image, imagesRef).naturalWidth - 100,
-      height: getHouseImage(closestClub.house_image, imagesRef).naturalHeight - 250,
+      width:
+        getHouseImage(closestClub.house_image, imagesRef).naturalWidth - 100,
+      height:
+        getHouseImage(closestClub.house_image, imagesRef).naturalHeight - 250,
     };
     const offset = 10; // Adjust this value as needed
     if (direction === "up") {
@@ -611,6 +612,7 @@ const Experience = () => {
         }
       }
     }
+    console.log(closest)
     gameStateRef.current.closestClub = closest;
     setClosestClubState(closest);
   }
@@ -643,8 +645,8 @@ const Experience = () => {
       </div>
       {loadingClubs && (
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#6A3C1F]"></div>
-          <p className="mt-4 text-[#6A3C1F] font-medium">Loading clubs...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#53674F]"></div>
+          <p className="mt-4 text-[#53674F] font-medium">Loading clubs...</p>
         </div>
       )}
       <button
@@ -668,7 +670,7 @@ const Experience = () => {
         <div className="fixed bottom-6 right-6">
           <button
             onClick={() => setShowSuggestModal(true)}
-            className="bg-[#6A3C1F] text-white py-3 px-5 rounded-full hover:bg-[#8B6B4F] transition-colors shadow-lg flex items-center"
+            className="bg-[#53674F] text-white py-3 px-5 rounded-full hover:bg-[#8B6B4F] transition-colors shadow-lg flex items-center"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

@@ -98,12 +98,12 @@ const AuthModal = ({ isOpen, onClose, onAuthComplete }) => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative bg-[#AF6E45] border-8 border-[#A3643C] rounded-2xl shadow-2xl shadow-[#AF6E45] max-w-md w-full overflow-hidden"
+              className="relative bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[70vh] overflow-visible"
             >
               {/* Close button */}
               <button
                 onClick={onClose}
-                className="absolute right-4 top-4 text-[#7E4C2C] transition-all hover:text-yellow-600 cursor-pointer"
+                className="absolute right-4 top-4 bg-white rounded-bl-xl p-2 text-[#53674F] transition-all hover:text-[#53674F]/90 cursor-pointer"
               >
                 <svg
                   className="w-6 h-6"
@@ -121,27 +121,27 @@ const AuthModal = ({ isOpen, onClose, onAuthComplete }) => {
               </button>
 
               {/* Header */}
-              <div className="p-6 border-b-4 border-[#6A3C1F]">
-                <Dialog.Title className="text-2xl font-bold text-[#6A3C1F] text-center">
+              <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white p-4 px-12 rounded-t-2xl">
+                <Dialog.Title className="text-2xl font-semibold text-[#53674F] text-center">
                   {activeTab === "login" ? "Login" : "Sign Up"}
                 </Dialog.Title>
               </div>
 
               {/* Body */}
-              <div className="p-6">
+              <div className="p-6 space-y-6 pt-16">
                 <Tab.Group
                   selectedIndex={activeTab === "login" ? 0 : 1}
                   onChange={(index) =>
                     setActiveTab(index === 0 ? "login" : "signup")
                   }
                 >
-                  <Tab.List className="flex mb-6 border-b border-[#6A3C1F]">
+                  <Tab.List className="flex mb-6 border-b border-[#53674F]">
                     <Tab
                       className={({ selected }) =>
-                        `flex-1 py-2 text-lg font-medium leading-5 text-[#6A3C1F] border-b-2 ${
+                        `flex-1 py-2 text-lg cursor-pointer font-medium leading-5 text-[#53674F] border-b-2 ${
                           selected
-                            ? "border-[#6A3C1F]"
-                            : "border-transparent hover:border-[#6A3C1F]/50"
+                            ? "border-[#53674F]"
+                            : "border-transparent hover:border-[#53674F]/50"
                         }`
                       }
                     >
@@ -149,10 +149,10 @@ const AuthModal = ({ isOpen, onClose, onAuthComplete }) => {
                     </Tab>
                     <Tab
                       className={({ selected }) =>
-                        `flex-1 py-2 text-lg font-medium leading-5 text-[#6A3C1F] border-b-2 ${
+                        `flex-1 py-2 text-lg font-medium leading-5 text-[#53674F] border-b-2 ${
                           selected
-                            ? "border-[#6A3C1F]"
-                            : "border-transparent hover:border-[#6A3C1F]/50"
+                            ? "border-[#53674F]"
+                            : "border-transparent hover:border-[#53674F]/50"
                         }`
                       }
                     >
@@ -164,7 +164,7 @@ const AuthModal = ({ isOpen, onClose, onAuthComplete }) => {
                     <Tab.Panel>
                       <form onSubmit={handleLogin} className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-[#6A3C1F] mb-1">
+                          <label className="block text-sm font-medium text-[#53674F] mb-1">
                             Email
                           </label>
                           <input
@@ -172,11 +172,11 @@ const AuthModal = ({ isOpen, onClose, onAuthComplete }) => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="w-full px-4 py-2 rounded-lg border border-[#6A3C1F] focus:outline-none focus:ring-2 focus:ring-[#A27B5C] bg-[#BE9871]"
+                            className="w-full px-4 py-2 rounded-lg border border-[#53674F] focus:outline-none focus:ring-2 focus:ring-[#53674F]"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-[#6A3C1F] mb-1">
+                          <label className="block text-sm font-medium text-[#53674F] mb-1">
                             Password
                           </label>
                           <input
@@ -184,7 +184,7 @@ const AuthModal = ({ isOpen, onClose, onAuthComplete }) => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="w-full px-4 py-2 rounded-lg border border-[#6A3C1F] focus:outline-none focus:ring-2 focus:ring-[#A27B5C] bg-[#BE9871]"
+                            className="w-full px-4 py-2 rounded-lg border border-[#53674F] focus:outline-none focus:ring-2 focus:ring-[#53674F]"
                           />
                         </div>
 
@@ -197,7 +197,7 @@ const AuthModal = ({ isOpen, onClose, onAuthComplete }) => {
                         <button
                           type="submit"
                           disabled={loading}
-                          className="w-full bg-[#6A3C1F] text-white py-2 px-4 rounded-lg hover:bg-[#8B6B4F] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full cursor-pointer bg-[#53674F] text-white py-2 px-4 rounded-lg hover:bg-[#53674F]/90 transition-colors duration-200 font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {loading ? "Loading..." : "Login"}
                         </button>
@@ -208,7 +208,7 @@ const AuthModal = ({ isOpen, onClose, onAuthComplete }) => {
                     <Tab.Panel>
                       <form onSubmit={handleSignup} className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-[#6A3C1F] mb-1">
+                          <label className="block text-sm font-medium text-[#53674F] mb-1">
                             Email
                           </label>
                           <input
@@ -216,11 +216,11 @@ const AuthModal = ({ isOpen, onClose, onAuthComplete }) => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="w-full px-4 py-2 rounded-lg border border-[#6A3C1F] focus:outline-none focus:ring-2 focus:ring-[#A27B5C] bg-[#BE9871]"
+                            className="w-full px-4 py-2 rounded-lg border border-[#53674F] focus:outline-none focus:ring-2 focus:ring-[#53674F]"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-[#6A3C1F] mb-1">
+                          <label className="block text-sm font-medium text-[#53674F] mb-1">
                             Password
                           </label>
                           <input
@@ -228,11 +228,11 @@ const AuthModal = ({ isOpen, onClose, onAuthComplete }) => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="w-full px-4 py-2 rounded-lg border border-[#6A3C1F] focus:outline-none focus:ring-2 focus:ring-[#A27B5C] bg-[#BE9871]"
+                            className="w-full px-4 py-2 rounded-lg border border-[#53674F] focus:outline-none focus:ring-2 focus:ring-[#53674F]"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-[#6A3C1F] mb-1">
+                          <label className="block text-sm font-medium text-[#53674F] mb-1">
                             Confirm Password
                           </label>
                           <input
@@ -240,7 +240,7 @@ const AuthModal = ({ isOpen, onClose, onAuthComplete }) => {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required
-                            className="w-full px-4 py-2 rounded-lg border border-[#6A3C1F] focus:outline-none focus:ring-2 focus:ring-[#A27B5C] bg-[#BE9871]"
+                            className="w-full px-4 py-2 rounded-lg border border-[#53674F] focus:outline-none focus:ring-2 focus:ring-[#53674F]"
                           />
                         </div>
 
@@ -253,7 +253,7 @@ const AuthModal = ({ isOpen, onClose, onAuthComplete }) => {
                         <button
                           type="submit"
                           disabled={loading}
-                          className="w-full bg-[#6A3C1F] text-white py-2 px-4 rounded-lg hover:bg-[#8B6B4F] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full bg-[#53674F] text-white py-2 px-4 rounded-lg hover:bg-[#53674F]/90 transition-colors duration-200 font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {loading ? "Loading..." : "Sign Up"}
                         </button>
@@ -263,11 +263,11 @@ const AuthModal = ({ isOpen, onClose, onAuthComplete }) => {
                 </Tab.Group>
 
                 {/* Google Sign In */}
-                <div className="mt-6 pt-6 border-t border-[#6A3C1F]/30">
+                <div className="mt-6 pt-6 border-t border-[#53674F]/30">
                   <button
                     onClick={handleGoogleSignIn}
                     disabled={loading}
-                    className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors duration-200 border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full cursor-pointer flex items-center justify-center gap-2 bg-white text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors duration-200 border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                       <path

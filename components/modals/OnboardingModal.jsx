@@ -166,42 +166,39 @@ const OnboardingModal = ({ isOpen, onClose }) => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative bg-[#AF6E45] border-8 border-[#A3643C] rounded-2xl shadow-2xl shadow-[#AF6E45] max-w-md w-full"
+              className="relative bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[70vh] overflow-visable"
             >
               {/* Header */}
-              <div className="p-6 border-b-4 border-[#6A3C1F]">
-                <Dialog.Title className="text-2xl font-bold text-[#6A3C1F] text-center">
+              <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white p-4 px-12 rounded-t-2xl">
+                <Dialog.Title className="text-2xl font-semibold text-[#53674F] text-center">
                   Welcome to Digital Haven
                 </Dialog.Title>
-                <p className="text-center mt-2 text-[#6A3C1F]/80">
+                <p className="text-center mt-2 text-[#53674F]/80">
                   Let's set up your profile ({step}/4)
                 </p>
               </div>
 
               {/* Body */}
-              <div className="p-6">
+              <div className="p-6 space-y-6 pt-16">
                 {renderStep()}
-
                 {error && (
                   <div className="text-red-600 text-sm mt-4">{error}</div>
                 )}
-
                 <div className="flex justify-between mt-8">
                   {step > 1 ? (
                     <button
                       onClick={handlePrevious}
-                      className="px-4 py-2 rounded-lg border border-[#6A3C1F] text-[#6A3C1F] hover:bg-[#6A3C1F10] transition-colors duration-200"
+                      className="px-4 py-2 rounded-lg border border-[#53674F] text-[#53674F] hover:bg-[#53674F]/10 transition-colors duration-200"
                     >
                       Back
                     </button>
                   ) : (
                     <div></div>
                   )}
-
                   {step < 4 ? (
                     <button
                       onClick={handleNext}
-                      className="px-6 py-2 rounded-lg bg-[#6A3C1F] text-white hover:bg-[#8B6B4F] transition-colors duration-200"
+                      className="px-6 py-2 rounded-lg bg-[#53674F] text-white hover:bg-[#53674F]/90 transition-colors duration-200 font-semibold text-lg"
                     >
                       Next
                     </button>
@@ -209,7 +206,7 @@ const OnboardingModal = ({ isOpen, onClose }) => {
                     <button
                       onClick={handleSubmit}
                       disabled={loading}
-                      className="px-6 py-2 rounded-lg bg-[#6A3C1F] text-white hover:bg-[#8B6B4F] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-6 py-2 rounded-lg bg-[#53674F] text-white hover:bg-[#53674F]/90 transition-colors duration-200 font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loading ? "Saving..." : "Finish"}
                     </button>
