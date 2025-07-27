@@ -45,6 +45,11 @@ const Experience = () => {
   const [decorationsState, setDecorationsState, decorationsStateRef] =
     useStateRef([]);
 
+  // Multiplayer state
+  const socketRef = useRef(null);
+  const playersRef = useRef({});
+  const playerIdRef = useRef(null);
+
   // Player state (moved from direct variables to state refs to persist across renders)
   const playerStateRef = useRef({
     position: {
@@ -185,13 +190,28 @@ const Experience = () => {
     // Set initial canvas size
     handleResize();
 
+    const handleKeyUp = (event) => {
+        const player = playerStateRef.current;
+
+        if (event.code === "ArrowLeft") {
+        player.directions.left = false;
+        }
+        if (event.code === "ArrowRight") {
+        player.directions.right = false;
+        }
+        if (event.code === "ArrowUp") {
+        player.directions.up = false;
+        }
+        if (event.code === "ArrowDown") {
+        player.directions.down = false;
+        }
+    }
+
     // Register event listeners
-    window.addEventListener("keydown", (e) => handleKeyDown(e, gameStateRef.current));
     window.addEventListener("keyup", handleKeyUp);
     window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("resize", handleResize);
       if (animationRef.current) {
@@ -199,6 +219,79 @@ const Experience = () => {
       }
     };
   }, []);
+
+  // WebSocket Connection
+  useEffect(() => {
+    console.log("running");
+    const ws = new WebSocket(
+      "wss://haven-websocket-server-production.up.railway.app/"
+    );
+    socketRef.current = ws;
+
+    ws.onopen = () => {
+      console.log("Connected to WebSocket server");
+    };
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+
+      if (message.type === "id") {
+        playerIdRef.current = message.id;
+        return;
+      }
+
+      if (message.type === "disconnect") {
+        delete playersRef.current[message.id];
+        return;
+      }
+
+      if (message.sender && message.sender !== playerIdRef.current) {
+        playersRef.current[message.sender] = message;
+      }
+    };
+
+    ws.onclose = () => {
+      console.log("Disconnected from WebSocket server");
+    };
+
+    return () => {
+      if (ws.readyState === 1) {
+        ws.close();
+      }
+    };
+  }, []);
+
+  // Keydown listener
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+        const player = playerStateRef.current;
+
+        if (event.code === "ArrowLeft") {
+        player.directions.left = true;
+        }
+        if (event.code === "ArrowRight") {
+        player.directions.right = true;
+        }
+        if (event.code === "ArrowUp") {
+        player.directions.up = true;
+        }
+        if (event.code === "ArrowDown") {
+        player.directions.down = true;
+        }
+        if (event.code === "Enter") {
+            if (isCloseEnoughToClub) {
+                handleClubClick(closestClubState);
+            }
+        }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+    }
+
+  }, [isCloseEnoughToClub, closestClubState]);
 
   // Start the game loop when clubs data is loaded
   useEffect(() => {
@@ -260,44 +353,6 @@ const Experience = () => {
   };
 
   // Keyboard input handlers
-  function handleKeyDown(event, gameState) {
-    const player = playerStateRef.current;
-
-    if (event.code === "ArrowLeft") {
-      player.directions.left = true;
-    }
-    if (event.code === "ArrowRight") {
-      player.directions.right = true;
-    }
-    if (event.code === "ArrowUp") {
-      player.directions.up = true;
-    }
-    if (event.code === "ArrowDown") {
-      player.directions.down = true;
-    }
-    if (event.code === "Enter") {
-      if (gameStateRef.current.closeEnough) {
-        handleClubClick(gameStateRef.current.closestClub);
-      }
-    }
-  }
-
-  function handleKeyUp(event) {
-    const player = playerStateRef.current;
-
-    if (event.code === "ArrowLeft") {
-      player.directions.left = false;
-    }
-    if (event.code === "ArrowRight") {
-      player.directions.right = false;
-    }
-    if (event.code === "ArrowUp") {
-      player.directions.up = false;
-    }
-    if (event.code === "ArrowDown") {
-      player.directions.down = false;
-    }
-  }
 
   // Game state handlers
   function stateHandler() {
@@ -574,6 +629,32 @@ const Experience = () => {
     );
   }
 
+  function drawOtherPlayer(otherPlayer) {
+    const ctx = ctxRef.current;
+    const images = imagesRef.current;
+    const gameState = gameStateRef.current;
+    const player = playerStateRef.current;
+
+    if (
+      ctx &&
+      images.char &&
+      otherPlayer.position &&
+      otherPlayer.currentFrame
+    ) {
+      ctx.drawImage(
+        images.char,
+        otherPlayer.currentFrame[0] * player.width,
+        otherPlayer.currentFrame[1] * player.height,
+        player.width,
+        player.height,
+        otherPlayer.position.x + gameState.scroll.x,
+        otherPlayer.position.y + gameState.scroll.y,
+        player.width * player.scale,
+        player.height * player.scale
+      );
+    }
+  }
+
   function clearCanvas() {
     const ctx = ctxRef.current;
     const canvas = canvasRef.current;
@@ -612,7 +693,6 @@ const Experience = () => {
         }
       }
     }
-    console.log(closest)
     gameStateRef.current.closestClub = closest;
     setClosestClubState(closest);
   }
@@ -621,9 +701,29 @@ const Experience = () => {
     updateClosestClub();
     clearCanvas();
     updatePlayerPosition();
+
+    // Send player state to server
+    if (socketRef.current && socketRef.current.readyState === 1) {
+      // WebSocket.OPEN is 1
+      const player = playerStateRef.current;
+      socketRef.current.send(
+        JSON.stringify({
+          position: player.position,
+          state: player.state,
+          currentFrame: player.currentFrame,
+        })
+      );
+    }
+
     // Draw all decorations and clubs behind the player
     drawClubsLayered(playerStateRef.current.position.y, false);
     drawDecorationsLayered(playerStateRef.current.position.y, false);
+
+    // Draw other players
+    for (const id in playersRef.current) {
+      drawOtherPlayer(playersRef.current[id]);
+    }
+
     // Draw player
     drawPlayer();
     // Draw all decorations and clubs in front of the player
@@ -670,7 +770,7 @@ const Experience = () => {
         <div className="fixed bottom-6 right-6">
           <button
             onClick={() => setShowSuggestModal(true)}
-            className="bg-[#53674F] text-white py-3 px-5 rounded-full hover:bg-[#8B6B4F] transition-colors shadow-lg flex items-center"
+            className="bg-[#53674F] text-white py-3 px-5 rounded-full hover:bg-[#53674F]/90 transition-colors shadow-lg flex items-center"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

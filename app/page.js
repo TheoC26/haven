@@ -296,11 +296,10 @@ export default function Home() {
 
       <Biker />
 
-      {!loadingClubs && 
-        ([...Array(Math.ceil(clubs.length/3))].map((_, index) => (
+      {!loadingClubs &&
+        [...Array(Math.ceil(clubs.length / 3))].map((_, index) => (
           <RoadSegment key={index} />
-        ))
-      )}
+        ))}
       {/* <RoadSegment />
       <RoadSegment />
       <RoadSegment /> */}
@@ -308,8 +307,8 @@ export default function Home() {
       {/* Houses/Clubs */}
       {loadingClubs ? (
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#6A3C1F]"></div>
-          <p className="mt-4 text-[#6A3C1F] font-medium">Loading clubs...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#53674F]"></div>
+          <p className="mt-4 text-[#53674F] font-medium">Loading clubs...</p>
         </div>
       ) : clubs.length > 0 ? (
         clubs.map((club, index) => (
@@ -335,10 +334,10 @@ export default function Home() {
       )}
 
       {/* Suggest Club button */}
-      <div className="fixed bottom-6 right-6">
+      <div className="fixed bottom-6 left-6">
         <button
           onClick={() => setShowSuggestModal(true)}
-          className="bg-[#6A3C1F] text-white py-3 px-5 rounded-full hover:bg-[#8B6B4F] transition-colors shadow-lg flex items-center"
+          className="bg-[#53674F] text-white py-3 px-5 rounded-full hover:bg-[#53674F]/90 transition-colors shadow-lg flex items-center"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
