@@ -178,4 +178,8 @@ export const GAME_CONSTANTS = {
   PLAYER_WIDTH: 391,
   PLAYER_HEIGHT: 908,
   PLAYER_SCALE: 0.166,
+  INITIAL_PLAYER_OFFSET: {
+    x: 20,
+    y: 150
+  }
 };

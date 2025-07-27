@@ -23,4 +23,8 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-cabin-sketch), cursive;
+  overscroll-behavior-y: none;
+}
+html {
+  overscroll-behavior-y: none;
 }

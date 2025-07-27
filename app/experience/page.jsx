@@ -7,6 +7,7 @@ import ProfileModal from "@/components/modals/ProfileModal";
 import HouseModal from "@/components/modals/HouseModal";
 import ApplyModal from "@/components/modals/ApplyModal";
 import SuggestClubModal from "@/components/modals/SuggestClubModal";
+import Joystick from "@/components/Joystick";
 import { useAuth } from "@/hooks/useAuth";
 import { useDecorations } from "@/hooks/useDecorations";
 import { useClubs } from "@/hooks/useClubs";
@@ -39,6 +40,7 @@ const Experience = () => {
   const [selectedClub, setSelectedClub] = useState(null);
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [showSuggestModal, setShowSuggestModal] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   // Game data state
   const [clubsState, setClubsState] = useState([]);
@@ -55,10 +57,12 @@ const Experience = () => {
     position: {
       x:
         window.innerWidth / 2 -
-        (GAME_CONSTANTS.PLAYER_WIDTH * GAME_CONSTANTS.PLAYER_SCALE) / 2,
+        (GAME_CONSTANTS.PLAYER_WIDTH * GAME_CONSTANTS.PLAYER_SCALE) / 2 +
+        GAME_CONSTANTS.INITIAL_PLAYER_OFFSET.x,
       y:
         window.innerHeight / 2 -
-        (GAME_CONSTANTS.PLAYER_HEIGHT * GAME_CONSTANTS.PLAYER_SCALE) / 2,
+        (GAME_CONSTANTS.PLAYER_HEIGHT * GAME_CONSTANTS.PLAYER_SCALE) / 2 +
+        GAME_CONSTANTS.INITIAL_PLAYER_OFFSET.y,
     },
     speed: GAME_CONSTANTS.PLAYER_SPEED,
     diagonalSpeed: GAME_CONSTANTS.PLAYER_DIAGONAL_SPEED,
@@ -83,7 +87,10 @@ const Experience = () => {
 
   // Game world state
   const gameStateRef = useRef({
-    scroll: { x: 0, y: 0 },
+    scroll: {
+      x: -GAME_CONSTANTS.INITIAL_PLAYER_OFFSET.x,
+      y: -GAME_CONSTANTS.INITIAL_PLAYER_OFFSET.y,
+    },
     closeEnough: false,
     closeEnoughDecoration: false,
     closestClub: null,
@@ -149,6 +156,7 @@ const Experience = () => {
       setShowGreeting(true);
       localStorage.setItem("hasVisited", "true");
     }
+    setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
   }, []);
 
   // Update clubs state when clubs data changes
@@ -176,14 +184,17 @@ const Experience = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
 
+
       // Update player position on resize
       playerStateRef.current.position = {
         x:
           window.innerWidth / 2 -
-          (playerStateRef.current.width * playerStateRef.current.scale) / 2,
+          (GAME_CONSTANTS.PLAYER_WIDTH * GAME_CONSTANTS.PLAYER_SCALE) / 2 +
+          GAME_CONSTANTS.INITIAL_PLAYER_OFFSET.x,
         y:
           window.innerHeight / 2 -
-          (playerStateRef.current.height * playerStateRef.current.scale) / 2,
+          (GAME_CONSTANTS.PLAYER_HEIGHT * GAME_CONSTANTS.PLAYER_SCALE) / 2 +
+          GAME_CONSTANTS.INITIAL_PLAYER_OFFSET.y,
       };
     };
 
@@ -191,21 +202,21 @@ const Experience = () => {
     handleResize();
 
     const handleKeyUp = (event) => {
-        const player = playerStateRef.current;
+      const player = playerStateRef.current;
 
-        if (event.code === "ArrowLeft") {
+      if (event.code === "ArrowLeft") {
         player.directions.left = false;
-        }
-        if (event.code === "ArrowRight") {
+      }
+      if (event.code === "ArrowRight") {
         player.directions.right = false;
-        }
-        if (event.code === "ArrowUp") {
+      }
+      if (event.code === "ArrowUp") {
         player.directions.up = false;
-        }
-        if (event.code === "ArrowDown") {
+      }
+      if (event.code === "ArrowDown") {
         player.directions.down = false;
-        }
-    }
+      }
+    };
 
     // Register event listeners
     window.addEventListener("keyup", handleKeyUp);
@@ -264,33 +275,32 @@ const Experience = () => {
   // Keydown listener
   useEffect(() => {
     const handleKeyDown = (event) => {
-        const player = playerStateRef.current;
+      const player = playerStateRef.current;
 
-        if (event.code === "ArrowLeft") {
+      if (event.code === "ArrowLeft") {
         player.directions.left = true;
-        }
-        if (event.code === "ArrowRight") {
+      }
+      if (event.code === "ArrowRight") {
         player.directions.right = true;
-        }
-        if (event.code === "ArrowUp") {
+      }
+      if (event.code === "ArrowUp") {
         player.directions.up = true;
-        }
-        if (event.code === "ArrowDown") {
+      }
+      if (event.code === "ArrowDown") {
         player.directions.down = true;
+      }
+      if (event.code === "Enter") {
+        if (isCloseEnoughToClub) {
+          handleClubClick(closestClubState);
         }
-        if (event.code === "Enter") {
-            if (isCloseEnoughToClub) {
-                handleClubClick(closestClubState);
-            }
-        }
-    }
+      }
+    };
 
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-        window.removeEventListener("keydown", handleKeyDown);
-    }
-
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [isCloseEnoughToClub, closestClubState]);
 
   // Start the game loop when clubs data is loaded
@@ -350,6 +360,11 @@ const Experience = () => {
     if (closestClubState) {
       handleClubClick(closestClubState);
     }
+  };
+
+  const handleJoystickMove = (directions) => {
+    const player = playerStateRef.current;
+    player.directions = directions;
   };
 
   // Keyboard input handlers
@@ -767,7 +782,7 @@ const Experience = () => {
         </svg>
       </button>
       {user && !user.isAnonymous && (
-        <div className="fixed bottom-6 right-6">
+        <div className="fixed bottom-6 left-6">
           <button
             onClick={() => setShowSuggestModal(true)}
             className="bg-[#53674F] text-white py-3 px-5 rounded-full hover:bg-[#53674F]/90 transition-colors shadow-lg flex items-center"
@@ -841,6 +856,7 @@ const Experience = () => {
         isOpen={showSuggestModal}
         onClose={() => setShowSuggestModal(false)}
       />
+      {isTouchDevice && <Joystick onMove={handleJoystickMove} />}
     </main>
   );
 };
