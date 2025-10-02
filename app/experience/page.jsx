@@ -46,6 +46,8 @@ const Experience = () => {
   const [clubsState, setClubsState] = useState([]);
   const [decorationsState, setDecorationsState, decorationsStateRef] =
     useStateRef([]);
+  const [isDirectlyBehind, setIsDirectlyBehind, isDirectlyBehindRef] =
+    useStateRef(false);
 
   // Multiplayer state
   const socketRef = useRef(null);
@@ -183,7 +185,6 @@ const Experience = () => {
     const handleResize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-
 
       // Update player position on resize
       playerStateRef.current.position = {
@@ -644,7 +645,9 @@ const Experience = () => {
     );
   }
 
-  function drawOtherPlayer(otherPlayer) {
+  function drawOtherPlayer(otherPlayer, isBehind) {
+    if (otherPlayer.isDirectlyBehind && !isBehind) return;
+    if (!otherPlayer.isDirectlyBehind && isBehind) return;
     const ctx = ctxRef.current;
     const images = imagesRef.current;
     const gameState = gameStateRef.current;
@@ -656,6 +659,24 @@ const Experience = () => {
       otherPlayer.position &&
       otherPlayer.currentFrame
     ) {
+      const dist = Math.sqrt(
+        (player.position.x - otherPlayer.position.x) ** 2 +
+          (player.position.y - otherPlayer.position.y) ** 2
+      );
+
+      if (dist < 100) {
+        ctx.fillStyle = "white";
+        ctx.font = "bold 16px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(
+          "Theo!!",
+          otherPlayer.position.x +
+            gameState.scroll.x +
+            (player.width * player.scale) / 2,
+          otherPlayer.position.y + gameState.scroll.y - 10
+        );
+      }
+
       ctx.drawImage(
         images.char,
         otherPlayer.currentFrame[0] * player.width,
@@ -712,8 +733,184 @@ const Experience = () => {
     setClosestClubState(closest);
   }
 
+  function updateClosestDecoration() {
+    const player = playerStateRef.current;
+    let minDist = Infinity;
+    let closest = null;
+    for (const decoration of decorationsStateRef.current) {
+      const decorationImg = getDecorationImageLocal(decoration.image);
+      if (!decorationImg || !decorationImg.complete) continue;
+      const px = player.position.x + (player.width * player.scale) / 2;
+      const py = player.position.y + (player.height * player.scale) / 2;
+      const dx =
+        decoration.pos_x + (decorationImg.width * decoration.scale) / 2;
+      const dy =
+        decoration.pos_y + (decorationImg.height * decoration.scale) / 2;
+      const dist = Math.sqrt((px - dx) ** 2 + (py - dy) ** 2);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = decoration;
+      }
+    }
+    gameStateRef.current.closestDecoration = closest;
+  }
+
+  function updateBehindStatus() {
+    const player = playerStateRef.current;
+    const closestClub = gameStateRef.current.closestClub;
+    const closestDecoration = gameStateRef.current.closestDecoration;
+
+    if (!closestClub && !closestDecoration) {
+      setIsDirectlyBehind(false);
+      return;
+    }
+
+    let clubDist = Infinity;
+    if (closestClub) {
+      const houseImg = getHouseImageLocal(closestClub.house_image);
+      if (houseImg && houseImg.complete) {
+        const px = player.position.x + (player.width * player.scale) / 2;
+        const py = player.position.y + (player.height * player.scale) / 2;
+        const cx = closestClub.pos_x + houseImg.naturalWidth / 2;
+        const cy = closestClub.pos_y + houseImg.naturalHeight / 2;
+        clubDist = Math.sqrt((px - cx) ** 2 + (py - cy) ** 2);
+      }
+    }
+
+    let decorationDist = Infinity;
+    if (closestDecoration) {
+      const decorationImg = getDecorationImageLocal(closestDecoration.image);
+      if (decorationImg && decorationImg.complete) {
+        const px = player.position.x + (player.width * player.scale) / 2;
+        const py = player.position.y + (player.height * player.scale) / 2;
+        const dx =
+          closestDecoration.pos_x +
+          (decorationImg.width * closestDecoration.scale) / 2;
+        const dy =
+          closestDecoration.pos_y +
+          (decorationImg.height * closestDecoration.scale) / 2;
+        decorationDist = Math.sqrt((px - dx) ** 2 + (py - dy) ** 2);
+      }
+    }
+
+    if (clubDist < decorationDist) {
+      const houseImg = getHouseImageLocal(closestClub.house_image);
+      if (houseImg && houseImg.complete) {
+        const playerBottom = player.position.y;
+        const clubTop = closestClub.pos_y + houseImg.naturalHeight / 4;
+        setIsDirectlyBehind(playerBottom < clubTop);
+      }
+    } else {
+      const decorationImg = getDecorationImageLocal(closestDecoration.image);
+      if (decorationImg && decorationImg.complete) {
+        const playerBottom = player.position.y + player.height * player.scale;
+        const decorationBottom =
+          closestDecoration.pos_y +
+          decorationImg.height * closestDecoration.scale;
+        setIsDirectlyBehind(playerBottom < decorationBottom);
+      }
+    }
+  }
+
+  // creature stuff
+
+  const creatures = [
+    createCreature(700, 800, "/art/creatures/creature1.png", 0.8),
+  ];
+
+  function createCreature(x, y, imageSrc, speed = 1) {
+    const img = new Image();
+    img.src = imageSrc;
+    console.log(img);
+
+    return {
+      position: { x: x, y: y }, // starting point
+      bounds: { left: x - 200, top: y - 200, width: 400, height: 400 },
+      target: null, // where it's walking to
+      isWalking: false,
+      waitTimer: 0,
+      angle: 0, // for bobble animation
+      angleDir: 1, // direction of bobble
+      size: 40, // radius for collision/spacing
+      speed,
+      img,
+
+      draw(ctx) {
+        const { x, y } = this.position;
+        const scale = 0.08;
+        const width = img.width * scale;
+        const height = img.height * scale;
+
+        ctx.save();
+        ctx.translate(
+          x + gameStateRef.current.scroll.x + width / 2,
+          y + gameStateRef.current.scroll.y + height
+        );
+        ctx.rotate(this.angle);
+        ctx.drawImage(img, -width / 2, -height/2 - 30, width, height);
+        ctx.restore();
+      },
+    };
+  }
+
+  function drawSorted(entities, ctx) {
+    // entities = [...players, ...creatures]
+    entities.sort((a, b) => a.y - b.y);
+
+    entities.forEach((e) => {
+      e.draw(ctx); // assumes each has its own draw() method
+    });
+  }
+
+  function updateCreature(creature, clubs, canvas) {
+    // If waiting, countdown
+    if (creature.waitTimer > 0) {
+      creature.waitTimer--;
+      return;
+    }
+
+    // If no target, pick a random one
+    if (!creature.target) {
+      const randX =
+        creature.bounds.left + Math.random() * creature.bounds.width;
+      const randY =
+        creature.bounds.top + Math.random() * creature.bounds.height;
+      creature.target = { x: randX, y: randY };
+      creature.isWalking = true;
+    }
+
+    // Move toward target
+    if (creature.isWalking && creature.target) {
+      const dx = creature.target.x - creature.position.x;
+      const dy = creature.target.y - creature.position.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < 2) {
+        // Reached target
+        creature.isWalking = false;
+        creature.target = null;
+        creature.waitTimer = 60 + Math.random() * 120; // 1–3 seconds pause
+      } else {
+        creature.position.x += (dx / dist) * creature.speed;
+        creature.position.y += (dy / dist) * creature.speed;
+      }
+    }
+
+    // Bobble effect (small rotation oscillation)
+    if (creature.isWalking) {
+      creature.angle += 0.05 * creature.angleDir;
+      if (Math.abs(creature.angle) > 0.18) {
+        creature.angleDir *= -1;
+      }
+    } else {
+      creature.angle = 0;
+    }
+  }
+
   function updateCanvas() {
     updateClosestClub();
+    updateClosestDecoration();
+    updateBehindStatus();
     clearCanvas();
     updatePlayerPosition();
 
@@ -726,24 +923,32 @@ const Experience = () => {
           position: player.position,
           state: player.state,
           currentFrame: player.currentFrame,
+          isDirectlyBehind: isDirectlyBehindRef.current,
         })
       );
+    }
+
+    for (const id in playersRef.current) {
+      drawOtherPlayer(playersRef.current[id], true);
     }
 
     // Draw all decorations and clubs behind the player
     drawClubsLayered(playerStateRef.current.position.y, false);
     drawDecorationsLayered(playerStateRef.current.position.y, false);
 
-    // Draw other players
-    for (const id in playersRef.current) {
-      drawOtherPlayer(playersRef.current[id]);
-    }
-
     // Draw player
     drawPlayer();
     // Draw all decorations and clubs in front of the player
     drawClubsLayered(playerStateRef.current.position.y, true);
     drawDecorationsLayered(playerStateRef.current.position.y, true);
+    // Draw other players
+    for (const id in playersRef.current) {
+      drawOtherPlayer(playersRef.current[id], false);
+    }
+
+    creatures.forEach((c) => updateCreature(c, clubs, canvasRef.current));
+    drawSorted([...creatures], ctxRef.current);
+
     stateHandler();
     animationHandler();
   }

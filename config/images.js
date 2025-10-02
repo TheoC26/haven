@@ -180,6 +180,6 @@ export const GAME_CONSTANTS = {
   PLAYER_SCALE: 0.166,
   INITIAL_PLAYER_OFFSET: {
     x: 20,
-    y: 150
+    y: 250
   }
 };
