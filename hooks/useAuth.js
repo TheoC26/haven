@@ -1,11 +1,10 @@
-"use client"
+"use client";
 import { createContext, useContext, useState, useEffect } from "react";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  signInAnonymously,
   signInWithPopup,
   GoogleAuthProvider,
 } from "firebase/auth";
@@ -23,18 +22,6 @@ export const AuthProvider = ({ children }) => {
     const userRef = doc(db, "users", uid);
     const userSnap = await getDoc(userRef);
     return userSnap.exists();
-  };
-
-  // Sign in anonymously
-  const signInAnon = async () => {
-    try {
-      const result = await signInAnonymously(auth);
-      localStorage.setItem("anonymousId", result.user.uid);
-      return result;
-    } catch (error) {
-      console.error("Error signing in anonymously:", error);
-      throw error;
-    }
   };
 
   // Sign in with email and password
@@ -65,27 +52,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    // Check for anonymous ID in localStorage
-    const anonymousId = localStorage.getItem("anonymousId");
-
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-      } else if (anonymousId) {
-        // Try to restore anonymous session
-        try {
-          await signInAnon();
-        } catch (error) {
-          console.error("Error restoring anonymous session:", error);
-        }
-      } else {
-        // Create new anonymous user
-        try {
-          await signInAnon();
-        } catch (error) {
-          console.error("Error creating anonymous user:", error);
-        }
-      }
+      setUser(currentUser ?? null);
       setLoading(false);
     });
 
@@ -99,7 +67,6 @@ export const AuthProvider = ({ children }) => {
         login,
         signup,
         logout,
-        signInAnon,
         signInWithGoogle,
         saveUserProfile,
         checkUserExists,

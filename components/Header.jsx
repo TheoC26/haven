@@ -1,38 +1,22 @@
 "use client";
 import React, { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import Image from "next/image";
+import Link from "next/link";
 
 const Header = ({ onInfoClick, onLoginClick, onProfileClick }) => {
   const { user } = useAuth();
 
   return (
-    <header className="absolute top-0 left-0 w-full p-4 z-50 flex justify-between items-center">
-      {/* Info button */}
-      <button
-        onClick={onInfoClick}
-        className="text-[#53674F] hover:text-[#808d7e] transition-colors"
-        aria-label="Info"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-8 h-8"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
-          />
-        </svg>
-      </button>
+    <header className="absolute top-0 left-0 w-full p-4 px-10 z-50 flex justify-between font-bold text-xl items-start bg-gradient-to-b from-[#B3DAAA] to-[#b3daaa00]">
+      <Link href={"/"}>
+        <Image src={"/logo.png"} width={80} height={80} alt="logo" />
+      </Link>
 
       {/* Logo/Title (optional, could be added here) */}
-      <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
+      {/* <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
         <h1 className="text-2xl font-bold text-[#53674F]">Digital Haven</h1>
-      </div>
+      </div> */}
 
       {/* Login/Profile button */}
       {user && !user.isAnonymous ? (
@@ -57,12 +41,28 @@ const Header = ({ onInfoClick, onLoginClick, onProfileClick }) => {
           </svg>
         </button>
       ) : (
-        <button
-          onClick={onLoginClick}
-          className="px-4 cursor-pointer py-2 bg-[#53674F] text-white rounded-lg hover:bg-[#808d7e] transition-colors"
-        >
-          Login
-        </button>
+        <div className="flex items-center gap-2 text-black">
+          {/* <div className="hover:opacity-90 transition-colors px-4 py-2 cursor-pointer">
+            About
+          </div>
+          <div className="hover:opacity-90 transition-colors px-4 py-2 cursor-pointer">
+            Community
+          </div> */}
+          <button
+            onClick={onLoginClick}
+            className="hover:opacity-90 transition-colors px-4 py-2 cursor-pointer mr-3"
+          >
+            Login
+          </button>
+          <Link
+            href={"https://form.typeform.com/to/xSrMkAaB"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-5 cursor-pointer py-2 bg-[#A1D196] text-black rounded-xl hover:scale-105 hover:opacity-90 transition-all"
+          >
+            Apply
+          </Link>
+        </div>
       )}
     </header>
   );

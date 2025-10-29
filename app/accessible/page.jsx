@@ -220,7 +220,7 @@ const pathPoints = [
   },
 ];
 
-export default function Home() {
+export default function AccessiblePage() {
   // Auth state
   const { user, checkUserExists } = useAuth();
 

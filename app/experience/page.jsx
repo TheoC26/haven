@@ -232,6 +232,14 @@ const Experience = () => {
     };
   }, []);
 
+  // Check if user needs onboarding when logged in
+  useEffect(() => {
+    console.log(user)
+    if (!user || user.isAnonymous) {
+      window.location.href = "/";
+    }
+  }, [user]);
+
   // WebSocket Connection
   useEffect(() => {
     console.log("running");
@@ -847,7 +855,7 @@ const Experience = () => {
           y + gameStateRef.current.scroll.y + height
         );
         ctx.rotate(this.angle);
-        ctx.drawImage(img, -width / 2, -height/2 - 30, width, height);
+        ctx.drawImage(img, -width / 2, -height / 2 - 30, width, height);
         ctx.restore();
       },
     };

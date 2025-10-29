@@ -20,7 +20,7 @@
 }
 
 body {
-  background: var(--background);
+  background: #B3DAAA;
   color: var(--foreground);
   font-family: var(--font-cabin-sketch), cursive;
   overscroll-behavior-y: none;
