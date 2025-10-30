@@ -8,7 +8,7 @@ const Header = ({ onInfoClick, onLoginClick, onProfileClick }) => {
   const { user } = useAuth();
 
   return (
-    <header className="absolute top-0 left-0 w-full p-4 px-10 z-50 flex justify-between font-bold text-xl items-start bg-gradient-to-b from-[#B3DAAA] to-[#b3daaa00]">
+    <header className="absolute top-0 left-0 w-full p-4 px-4 md:px-10 z-50 flex justify-between font-bold text-xl items-start bg-gradient-to-b from-[#B3DAAA] to-[#b3daaa00]">
       <Link href={"/"}>
         <Image src={"/logo.png"} width={80} height={80} alt="logo" />
       </Link>

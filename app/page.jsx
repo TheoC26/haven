@@ -182,7 +182,7 @@ export default function Home() {
         A place to stay connected with online communities <br /> Build together.
         Learn together. <br /> Be together.
       </div>
-      <div className="absolute w-full md:w-3xl scale-95 text-black text-center left-1/2 -translate-x-1/2 font-bold top-[1080px] md:top-[1700px]">
+      <div className="absolute w-full md:w-3xl scale-95 text-black text-center left-1/2 -translate-x-1/2 font-bold top-[1120px] md:top-[1700px]">
         <h2 className="w-full text-center mb-5 text-4xl">Watch it in action</h2>
         <div className="w-full md:w-3xl aspect-video bg-black rounded-3xl border-8 border-[#53674F]"></div>
       </div>
@@ -201,7 +201,7 @@ export default function Home() {
           <div className="col-span-2 row-span-3 bg-[#ADD2A4] rounded-2xl flex flex-col items-center justify-between p-6 gap-6"></div>
           <div className="col-span-2 row-span-4 bg-[#ADD2A4] rounded-2xl flex flex-col items-center justify-between p-6 gap-6"></div>
           <div className="col-span-1 row-span-3 bg-[#ADD2A4] rounded-2xl flex p-3 justify-between flex-col items-center py-6"></div>
-          <div className="col-span-1 row-span-3 bg-[#ADD2A4] rounded-2xl flex items-center justify-around transition-all hover:scale-105 hover:shadow-lg"></div>
+          <div className="col-span-1 row-span-3 bg-[#ADD2A4] rounded-2xl flex items-center justify-around transition-all"></div>
         </div>
         <div className="grid lg:hidden grid-cols-2 md:grid-cols-4 md:grid-rows-6 gap-4 h-[40rem] p-3 md:p-12">
           <div className="col-span-2 row-span-2 bg-[#ADD2A4] rounded-2xl hidden md:flex flex-col items-center justify-between p-3 gap-1"></div>
@@ -215,17 +215,17 @@ export default function Home() {
           <div className="col-span-2 row-span-3 bg-[#ADD2A4] rounded-2xl flex p-3 justify-between flex-col items-center"></div>
           <div className="col-span-2 row-span-4 bg-[#ADD2A4] rounded-2xl flex flex-col items-center justify-between p-6 gap-6"></div>
           <div className="col-span-1 row-span-4 bg-[#ADD2A4] rounded-2xl flex p-3 justify-between flex-col items-center py-6"></div>
-          <div className="col-span-1 row-span-4 bg-[#ADD2A4] rounded-2xl flex items-center justify-around transition-all hover:scale-105 hover:shadow-lg"></div>
+          <div className="col-span-1 row-span-4 bg-[#ADD2A4] rounded-2xl flex items-center justify-around transition-all"></div>
         </div>
       </section>
-      <div className="h-[200vh] md:h-[280vh]"></div>
+      <div className="h-[1716px] md:h-[2400px]]"></div>
       <div className="w-full flex flex-col items-center justify-between">
         <Link
           href={"https://www.thisteenagelife.org/"}
           className="flex flex-col items-center mb-32 cursor-pointer"
         >
           <Image src={"/ttllogo.png"} width={250} height={250} alt="logo" />
-          <h1 className="text-4xl font-bold text-[#53674F] mt-5">
+          <h1 className="text-4xl text-center font-bold text-[#53674F] mt-5">
             Sponcered by: This Teenage Life
           </h1>
         </Link>
