@@ -25,6 +25,7 @@ export const IMAGES = {
   grass1: "/art/decoration/grass1.png",
   grass2: "/art/decoration/grass2.png",
   grass3: "/art/decoration/grass3.png",
+  welcomesign: "/art/decoration/welcomehaven.png"
 };
 
 // Decoration image mapping (index -> image key)
@@ -47,6 +48,7 @@ export const DECORATION_IMAGE_MAP = {
   16: "grass1",
   17: "grass2",
   18: "grass3",
+  19: "welcomesign",
 };
 
 // House image mapping (index -> image key)
@@ -148,6 +150,11 @@ export const DECORATIONS_TO_CHOOSE_FROM = [
     name: "Grass 3",
     image: 18,
     imageUrl: IMAGES.grass3,
+  },
+  {
+    name: "Welcome Sign",
+    image: 19,
+    imageUrl: IMAGES.welcomesign,
   },
 ];
 
