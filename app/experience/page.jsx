@@ -21,6 +21,8 @@ import {
   GAME_CONSTANTS,
 } from "@/config/images";
 
+import { db } from "@/firebase";
+
 const Experience = () => {
   // Canvas references
   const canvasRef = useRef(null);
@@ -143,6 +145,39 @@ const Experience = () => {
   const { user, checkUserExists } = useAuth();
   const { clubs, loading: loadingClubs } = useClubs();
   const { decorations, loading: loadingDecorations } = useDecorations();
+
+  const [userData, setUserData] = useState(null);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user || user.isAnonymous) return;
+
+      try {
+        setIsLoading(true);
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          setUserData(userSnap.data());
+        } else {
+          // User exists in auth but not in Firestore
+          setUserData({
+            name: "Anonymous User",
+            color: "#6A3C1F",
+            bio: "No profile information available.",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [user]);
 
   // Load images
   useEffect(() => {
@@ -676,8 +711,10 @@ const Experience = () => {
         ctx.fillStyle = "white";
         ctx.font = "bold 16px Arial";
         ctx.textAlign = "center";
+        // Use the received name or fallback to "Anonymous"
+        const displayName = otherPlayer.name || "Anonymous";
         ctx.fillText(
-          "Theo!!",
+          displayName,
           otherPlayer.position.x +
             gameState.scroll.x +
             (player.width * player.scale) / 2,
@@ -923,8 +960,12 @@ const Experience = () => {
     updatePlayerPosition();
 
     // Send player state to server
-    if (socketRef.current && socketRef.current.readyState === 1) {
-      // WebSocket.OPEN is 1
+    if (
+      socketRef.current &&
+      socketRef.current.readyState === 1 &&
+      !isLoading &&
+      userData
+    ) {
       const player = playerStateRef.current;
       socketRef.current.send(
         JSON.stringify({
@@ -932,6 +973,7 @@ const Experience = () => {
           state: player.state,
           currentFrame: player.currentFrame,
           isDirectlyBehind: isDirectlyBehindRef.current,
+          name: userData?.name || "Anonymous", // Add this line
         })
       );
     }
