@@ -62,7 +62,7 @@ export default function AdminPage() {
             // Get club name
             let clubName = "";
             if (data.clubID) {
-              console.log(data.clubID)
+              console.log(data.clubID);
               const clubRef = doc(db, "club", data.clubID);
               const clubDoc = await getDoc(clubRef);
               if (clubDoc.exists()) {
@@ -70,7 +70,7 @@ export default function AdminPage() {
               }
             }
 
-            console.log(docRef.id)
+            console.log(docRef.id);
 
             return {
               id: docRef.id,
@@ -166,8 +166,8 @@ export default function AdminPage() {
 
   if (loadingAdmin) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-[#B3DAAA]">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#6A3C1F]"></div>
+      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#53674F]"></div>
       </div>
     );
   }
@@ -177,54 +177,58 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#B3DAAA] p-6">
-      <div className="max-w-6xl mx-auto bg-[#AF6E45] rounded-xl border-8 border-[#A3643C] shadow-xl overflow-hidden">
-        <div className="p-6 bg-[#A3643C] border-b-4 border-[#6A3C1F]">
-          <h1 className="text-2xl font-bold text-white">Digital Haven Admin</h1>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        {/* Header */}
+        <div className="p-6 bg-[#53674F] text-white">
+          <h1 className="text-3xl font-bold">Digital Haven Admin</h1>
+          <p className="text-[#53674F]/20 mt-1">
+            Manage clubs, users, and applications
+          </p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-[#6A3C1F]">
+        <div className="flex border-b border-gray-200">
           <button
-            className={`px-6 py-3 text-lg font-medium ${
+            className={`px-8 py-4 text-lg font-medium transition-colors ${
               activeTab === "clubs"
-                ? "bg-[#6A3C1F] text-white"
-                : "text-[#6A3C1F] hover:bg-[#6A3C1F10]"
+                ? "border-b-2 border-[#53674F] text-[#53674F] bg-[#53674F]/5"
+                : "text-gray-600 hover:text-[#53674F] hover:bg-gray-50"
             }`}
             onClick={() => setActiveTab("clubs")}
           >
-            Clubs
+            Clubs ({clubs.length})
           </button>
           <button
-            className={`px-6 py-3 text-lg font-medium ${
+            className={`px-8 py-4 text-lg font-medium transition-colors ${
               activeTab === "users"
-                ? "bg-[#6A3C1F] text-white"
-                : "text-[#6A3C1F] hover:bg-[#6A3C1F10]"
+                ? "border-b-2 border-[#53674F] text-[#53674F] bg-[#53674F]/5"
+                : "text-gray-600 hover:text-[#53674F] hover:bg-gray-50"
             }`}
             onClick={() => setActiveTab("users")}
           >
-            Users
+            Users ({users.length})
           </button>
           <button
-            className={`px-6 py-3 text-lg font-medium ${
+            className={`px-8 py-4 text-lg font-medium transition-colors ${
               activeTab === "applications"
-                ? "bg-[#6A3C1F] text-white"
-                : "text-[#6A3C1F] hover:bg-[#6A3C1F10]"
+                ? "border-b-2 border-[#53674F] text-[#53674F] bg-[#53674F]/5"
+                : "text-gray-600 hover:text-[#53674F] hover:bg-gray-50"
             }`}
             onClick={() => setActiveTab("applications")}
           >
-            Applications
+            Applications ({applications.length})
           </button>
         </div>
 
         {/* Content Area */}
-        <div className="p-6">
+        <div className="p-8">
           {loading ? (
             <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#6A3C1F]"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#53674F]"></div>
             </div>
           ) : error ? (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
               {error}
             </div>
           ) : (
@@ -232,44 +236,44 @@ export default function AdminPage() {
               {/* Clubs Tab */}
               {activeTab === "clubs" && (
                 <div>
-                  <h2 className="text-xl font-semibold text-[#6A3C1F] mb-4">
-                    Manage Clubs ({clubs.length})
+                  <h2 className="text-2xl font-semibold text-black mb-6">
+                    Manage Clubs
                   </h2>
 
-                  <div className="overflow-auto bg-[#BE9871] rounded-lg shadow">
-                    <table className="min-w-full divide-y divide-[#6A3C1F]/30">
-                      <thead className="bg-[#6A3C1F]">
+                  <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                            Name
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                            Club Name
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                             Leader
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                             Members
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                             Actions
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#6A3C1F]/20">
+                      <tbody className="divide-y divide-gray-200">
                         {clubs.map((club) => (
-                          <tr key={club.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-[#6A3C1F]">
+                          <tr key={club.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 text-black font-medium">
                               {club.name}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-[#6A3C1F]">
+                            <td className="px-6 py-4 text-gray-600">
                               {club.leaderName}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-[#6A3C1F]">
+                            <td className="px-6 py-4 text-gray-600">
                               {club.members ? club.members.length : 0}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-[#6A3C1F]">
+                            <td className="px-6 py-4">
                               <button
                                 onClick={() => handleDeleteClub(club.id)}
-                                className="text-red-500 hover:text-red-700"
+                                className="text-red-600 hover:text-red-800 font-medium transition-colors"
                               >
                                 Delete
                               </button>
@@ -281,7 +285,7 @@ export default function AdminPage() {
                           <tr>
                             <td
                               colSpan={4}
-                              className="px-6 py-4 text-center text-[#6A3C1F]"
+                              className="px-6 py-8 text-center text-gray-500"
                             >
                               No clubs found
                             </td>
@@ -296,40 +300,45 @@ export default function AdminPage() {
               {/* Users Tab */}
               {activeTab === "users" && (
                 <div>
-                  <h2 className="text-xl font-semibold text-[#6A3C1F] mb-4">
-                    Manage Users ({users.length})
+                  <h2 className="text-2xl font-semibold text-black mb-6">
+                    Manage Users
                   </h2>
 
-                  <div className="overflow-auto bg-[#BE9871] rounded-lg shadow">
-                    <table className="min-w-full divide-y divide-[#6A3C1F]/30">
-                      <thead className="bg-[#6A3C1F]">
+                  <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                             Name
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                             Color
                           </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                             Bio
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#6A3C1F]/20">
+                      <tbody className="divide-y divide-gray-200">
                         {users.map((user) => (
-                          <tr key={user.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-[#6A3C1F]">
+                          <tr key={user.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 text-black font-medium">
                               {user.name}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div
-                                className="w-6 h-6 rounded-full"
-                                style={{
-                                  backgroundColor: user.color || "#6A3C1F",
-                                }}
-                              ></div>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center space-x-2">
+                                <div
+                                  className="w-6 h-6 rounded-full border border-gray-300"
+                                  style={{
+                                    backgroundColor: user.color || "#53674F",
+                                  }}
+                                ></div>
+                                <span className="text-gray-600 text-sm">
+                                  {user.color || "#53674F"}
+                                </span>
+                              </div>
                             </td>
-                            <td className="px-6 py-4 text-[#6A3C1F]">
+                            <td className="px-6 py-4 text-gray-600 max-w-xs truncate">
                               {user.bio || "No bio"}
                             </td>
                           </tr>
@@ -339,7 +348,7 @@ export default function AdminPage() {
                           <tr>
                             <td
                               colSpan={3}
-                              className="px-6 py-4 text-center text-[#6A3C1F]"
+                              className="px-6 py-8 text-center text-gray-500"
                             >
                               No users found
                             </td>
@@ -354,23 +363,31 @@ export default function AdminPage() {
               {/* Applications Tab */}
               {activeTab === "applications" && (
                 <div>
-                  <h2 className="text-xl font-semibold text-[#6A3C1F] mb-4">
-                    Applications ({applications.length})
+                  <h2 className="text-2xl font-semibold text-black mb-6">
+                    Application Management
                   </h2>
 
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {applications.map((application) => (
                       <div
                         key={application.id}
-                        className="bg-[#BE9871] rounded-lg overflow-hidden shadow border border-[#6A3C1F]/20"
+                        className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm"
                       >
-                        <div className="p-4 bg-[#A3643C] border-b border-[#6A3C1F]/20">
+                        <div className="p-6 bg-gray-50 border-b border-gray-200">
                           <div className="flex justify-between items-center">
-                            <h3 className="text-lg font-medium text-white">
-                              {application.name} → {application.clubName}
-                            </h3>
+                            <div>
+                              <h3 className="text-xl font-semibold text-black">
+                                {application.name}
+                              </h3>
+                              <p className="text-gray-600 mt-1">
+                                Applying to:{" "}
+                                <span className="font-medium">
+                                  {application.clubName}
+                                </span>
+                              </p>
+                            </div>
                             <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              className={`px-3 py-1 rounded-full text-sm font-medium ${
                                 application.status === "approved"
                                   ? "bg-green-100 text-green-800"
                                   : application.status === "rejected"
@@ -378,48 +395,48 @@ export default function AdminPage() {
                                   : "bg-yellow-100 text-yellow-800"
                               }`}
                             >
-                              {application.status || "pending"}
+                              {application.status || "Pending"}
                             </span>
                           </div>
                         </div>
 
-                        <div className="p-4 space-y-3">
+                        <div className="p-6 space-y-4">
                           <div>
-                            <h4 className="text-sm font-medium text-[#6A3C1F]">
+                            <h4 className="text-sm font-semibold text-black mb-2">
                               Bio
                             </h4>
-                            <p className="text-[#6A3C1F]">
+                            <p className="text-gray-700">
                               {application.bio || "No bio provided"}
                             </p>
                           </div>
 
                           <div>
-                            <h4 className="text-sm font-medium text-[#6A3C1F]">
+                            <h4 className="text-sm font-semibold text-black mb-2">
                               Why they want to join
                             </h4>
-                            <p className="text-[#6A3C1F]">
+                            <p className="text-gray-700">
                               {application.whyWantToJoin}
                             </p>
                           </div>
 
                           {application.anythingWeShouldKnow && (
                             <div>
-                              <h4 className="text-sm font-medium text-[#6A3C1F]">
+                              <h4 className="text-sm font-semibold text-black mb-2">
                                 Additional information
                               </h4>
-                              <p className="text-[#6A3C1F]">
+                              <p className="text-gray-700">
                                 {application.anythingWeShouldKnow}
                               </p>
                             </div>
                           )}
 
                           {application.status === "pending" && (
-                            <div className="flex space-x-2 pt-2">
+                            <div className="flex space-x-3 pt-4 border-t border-gray-200">
                               <button
                                 onClick={() =>
                                   handleApproveApplication(application)
                                 }
-                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                className="px-6 py-2 bg-[#53674F] text-white rounded-lg hover:bg-[#53674F]/90 transition-colors font-medium"
                               >
                                 Approve
                               </button>
@@ -427,7 +444,7 @@ export default function AdminPage() {
                                 onClick={() =>
                                   handleRejectApplication(application)
                                 }
-                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
                               >
                                 Reject
                               </button>
@@ -438,7 +455,7 @@ export default function AdminPage() {
                     ))}
 
                     {applications.length === 0 && (
-                      <div className="bg-[#BE9871] rounded-lg p-6 text-center text-[#6A3C1F]">
+                      <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-gray-500">
                         No applications found
                       </div>
                     )}

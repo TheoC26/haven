@@ -99,7 +99,7 @@ const ApplyModal = ({ isOpen, onClose, clubId }) => {
           exit={{ opacity: 0 }}
           open={isOpen}
           onClose={handleClose}
-          className="relative z-50 text-[#7E4C2C]"
+          className="relative z-50 text-black"
         >
           {/* Backdrop */}
           <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
@@ -111,7 +111,7 @@ const ApplyModal = ({ isOpen, onClose, clubId }) => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[70vh] overflow-visable"
+              className="relative bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[70vh] overflow-auto"
             >
               {/* Close button */}
               <button
@@ -133,123 +133,131 @@ const ApplyModal = ({ isOpen, onClose, clubId }) => {
                 </svg>
               </button>
 
-              {/* Header */}
-              <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white p-4 px-12 rounded-t-2xl">
-                <Dialog.Title className="text-2xl font-semibold text-[#53674F] text-center">
-                  {success ? "Application Submitted!" : "Apply to Join Club"}
-                </Dialog.Title>
-              </div>
+              {/* Content */}
+              <div className="overflow-y-auto">
+                {/* Header */}
+                <div className="fixed top-[8vh] left-1/2 -translate-x-1/2 -z-10 bg-white p-4 px-12 rounded-t-2xl">
+                  <Dialog.Title className="text-2xl font-semibold text-[#53674F] text-center">
+                    {success ? "Application Submitted!" : "Apply to Join Club"}
+                  </Dialog.Title>
+                </div>
 
-              {/* Body */}
-              <div className="p-6 space-y-6 pt-16">
-                {success ? (
-                  <div className="text-center space-y-4">
-                    <svg
-                      className="mx-auto h-16 w-16 text-green-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    <h3 className="text-xl font-semibold text-[#53674F]">
-                      Thank You!
-                    </h3>
-                    <p className="text-[#53674F]">
-                      Your application has been successfully submitted. The club
-                      leader will review your application and get back to you
-                      soon.
-                    </p>
-                    <button
-                      onClick={handleClose}
-                      className="mt-4 w-full bg-[#53674F] text-white py-3 px-4 rounded-lg hover:bg-[#53674F]/90 transition-colors duration-200 font-semibold text-lg"
-                    >
-                      Close
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-[#6A3C1F] mb-1">
-                        Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                        className="w-full px-4 py-2 rounded-lg border border-[#6A3C1F] focus:outline-none focus:ring-2 focus:ring-[#A27B5C] bg-[#BE9871]"
-                      />
+                {/* Body */}
+                <div className="p-6 space-y-6">
+                  {success ? (
+                    <div className="text-center space-y-4 mt-16">
+                      <svg
+                        className="mx-auto h-16 w-16 text-green-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <h3 className="text-xl font-semibold text-[#53674F]">
+                        Thank You!
+                      </h3>
+                      <p className="text-black">
+                        Your application has been successfully submitted. The
+                        club leader will review your application and get back to
+                        you soon.
+                      </p>
+                      <button
+                        onClick={handleClose}
+                        className="mt-4 w-full bg-[#53674F] text-white py-3 px-4 rounded-lg hover:bg-[#53674F]/90 transition-colors duration-200 font-semibold text-lg"
+                      >
+                        Close
+                      </button>
                     </div>
+                  ) : (
+                    <form onSubmit={handleSubmit} className="space-y-4 mt-16">
+                      <div>
+                        <label className="block text-sm font-medium text-black mb-1">
+                          Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          required
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#53674F] focus:border-transparent"
+                        />
+                      </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-[#6A3C1F] mb-1">
-                        Birthday
-                      </label>
-                      <input
-                        type="date"
-                        value={birthday}
-                        onChange={(e) => setBirthday(e.target.value)}
-                        className="w-full px-4 py-2 rounded-lg border border-[#6A3C1F] focus:outline-none focus:ring-2 focus:ring-[#A27B5C] bg-[#BE9871]"
-                      />
-                    </div>
+                      <div>
+                        <label className="block text-sm font-medium text-black mb-1">
+                          Birthday
+                        </label>
+                        <input
+                          type="date"
+                          value={birthday}
+                          onChange={(e) => setBirthday(e.target.value)}
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#53674F] focus:border-transparent"
+                        />
+                      </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-[#6A3C1F] mb-1">
-                        Bio
-                      </label>
-                      <textarea
-                        value={bio}
-                        onChange={(e) => setBio(e.target.value)}
-                        rows={2}
-                        className="w-full px-4 py-2 rounded-lg border border-[#6A3C1F] focus:outline-none focus:ring-2 focus:ring-[#A27B5C] bg-[#BE9871]"
-                      />
-                    </div>
+                      <div>
+                        <label className="block text-sm font-medium text-black mb-1">
+                          Bio
+                        </label>
+                        <textarea
+                          value={bio}
+                          onChange={(e) => setBio(e.target.value)}
+                          rows={2}
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#53674F] focus:border-transparent"
+                        />
+                      </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-[#6A3C1F] mb-1">
-                        Why do you want to join this club?{" "}
-                        <span className="text-red-500">*</span>
-                      </label>
-                      <textarea
-                        value={whyJoin}
-                        onChange={(e) => setWhyJoin(e.target.value)}
-                        required
-                        rows={3}
-                        className="w-full px-4 py-2 rounded-lg border border-[#6A3C1F] focus:outline-none focus:ring-2 focus:ring-[#A27B5C] bg-[#BE9871]"
-                      />
-                    </div>
+                      <div>
+                        <label className="block text-sm font-medium text-black mb-1">
+                          Why do you want to join this club?{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <textarea
+                          value={whyJoin}
+                          onChange={(e) => setWhyJoin(e.target.value)}
+                          required
+                          rows={3}
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#53674F] focus:border-transparent"
+                        />
+                      </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-[#6A3C1F] mb-1">
-                        Anything else we should know?
-                      </label>
-                      <textarea
-                        value={extraInfo}
-                        onChange={(e) => setExtraInfo(e.target.value)}
-                        rows={3}
-                        className="w-full px-4 py-2 rounded-lg border border-[#6A3C1F] focus:outline-none focus:ring-2 focus:ring-[#A27B5C] bg-[#BE9871]"
-                      />
-                    </div>
+                      <div>
+                        <label className="block text-sm font-medium text-black mb-1">
+                          Anything else we should know?
+                        </label>
+                        <textarea
+                          value={extraInfo}
+                          onChange={(e) => setExtraInfo(e.target.value)}
+                          rows={3}
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#53674F] focus:border-transparent"
+                        />
+                      </div>
 
-                    {error && (
-                      <div className="text-red-600 text-sm">{error}</div>
-                    )}
+                      {error && (
+                        <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
+                          {error}
+                        </div>
+                      )}
 
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full bg-[#53674F] text-white py-3 px-4 rounded-lg hover:bg-[#53674F]/90 transition-colors duration-200 font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {loading ? "Submitting..." : "Submit Application"}
-                    </button>
-                  </form>
-                )}
+                      {/* Submit button in its own section with border */}
+                      <div className="mt-8 pt-8 border-t border-[#53674F]/30">
+                        <button
+                          type="submit"
+                          disabled={loading}
+                          className="w-full bg-[#53674F] text-white py-3 px-4 rounded-lg hover:bg-[#53674F]/90 transition-colors duration-200 font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {loading ? "Submitting..." : "Submit Application"}
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
               </div>
             </Dialog.Panel>
           </div>
