@@ -21,6 +21,8 @@ import {
   GAME_CONSTANTS,
 } from "@/config/images";
 
+
+import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 
 const Experience = () => {
