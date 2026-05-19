@@ -24,10 +24,10 @@ export class Entity {
     const screenX = this.x + scroll.x;
     const screenY = this.y + scroll.y;
     return (
-      screenX + this.width > 0 &&
-      screenX < canvas.width &&
-      screenY + this.height > 0 &&
-      screenY < canvas.height
+      screenX + this.width > -100 &&
+      screenX < canvas.width + 100 &&
+      screenY + this.height > -100 &&
+      screenY < canvas.height + 100
     );
   }
 }

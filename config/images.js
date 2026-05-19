@@ -2,7 +2,10 @@
 
 // Image definitions
 export const IMAGES = {
-  char: "/art/spritesheet3.png",
+  char: "/art/spritesheetambiguous.png",
+  char_ambiguous: "/art/spritesheetambiguous.png",
+  char_male: "/art/spritesheetmale.png",
+  char_female: "/art/spritesheetfemale.png",
   house1: "/art/house/house1.png",
   house2: "/art/house/house2.png",
   house3: "/art/house/house3.png",
@@ -182,9 +185,9 @@ export const GAME_CONSTANTS = {
   CLUB_INTERACTION_DISTANCE: 355,
   PLAYER_SPEED: 5,
   PLAYER_DIAGONAL_SPEED: Math.sqrt(Math.pow(5, 2) / 2),
-  PLAYER_WIDTH: 391,
-  PLAYER_HEIGHT: 908,
-  PLAYER_SCALE: 0.166,
+  PLAYER_WIDTH: 183,
+  PLAYER_HEIGHT: 428,
+  PLAYER_SCALE: 0.35,
   INITIAL_PLAYER_OFFSET: {
     x: 20,
     y: 250

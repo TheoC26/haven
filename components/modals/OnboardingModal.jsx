@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 const OnboardingModal = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
-  const [color, setColor] = useState("#6A3C1F");
+  const [character, setCharacter] = useState("char_ambiguous");
   const [birthday, setBirthday] = useState("");
   const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,7 +36,7 @@ const OnboardingModal = ({ isOpen, onClose }) => {
   };
 
   const handleSubmit = async () => {
-    if (!name || !birthday || !color) {
+    if (!name || !birthday || !character) {
       setError("Please fill in all required fields");
       return;
     }
@@ -46,7 +46,7 @@ const OnboardingModal = ({ isOpen, onClose }) => {
     try {
       const userData = {
         name,
-        color,
+        character,
         birthday,
         bio: bio || "",
         createdAt: new Date(),
@@ -103,21 +103,38 @@ const OnboardingModal = ({ isOpen, onClose }) => {
         return (
           <div className="space-y-4">
             <h3 className="text-xl font-semibold text-[#6A3C1F]">
-              Choose your color
+              Choose your character
             </h3>
             <p className="text-[#6A3C1F]/80">
-              Select a color that represents you best.
+              Select an avatar that represents you best.
             </p>
-            <input
-              type="color"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              className="w-full h-12 rounded-lg cursor-pointer border border-[#6A3C1F]"
-            />
-            <div
-              className="mt-4 h-16 w-full rounded-lg border border-[#6A3C1F]"
-              style={{ backgroundColor: color }}
-            ></div>
+            <div className="grid grid-cols-3 gap-4 mt-4">
+              {[
+                { id: "char_ambiguous", label: "Neutral" },
+                { id: "char_male", label: "Style 1" },
+                { id: "char_female", label: "Style 2" },
+              ].map((char) => (
+                <div
+                  key={char.id}
+                  onClick={() => setCharacter(char.id)}
+                  className={`cursor-pointer p-4 rounded-xl border-2 transition-all ${
+                    character === char.id
+                      ? "border-[#53674F] bg-[#53674F]/10 scale-105"
+                      : "border-gray-200 hover:border-[#53674F]/50"
+                  }`}
+                >
+                  <div className="aspect-[1/2] w-full bg-gray-100 rounded-lg mb-2 overflow-hidden flex items-center justify-center">
+                    <img
+                      src={`/art/${char.id === "char_ambiguous" ? "spritesheetambiguous" : char.id === "char_male" ? "spritesheetmale" : "spritesheetfemale"}.png`}
+                      alt={char.label}
+                      className="h-full object-cover object-top"
+                      style={{ transform: "scale(2) translateY(10%)" }}
+                    />
+                  </div>
+                  <p className="text-center font-medium text-sm">{char.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         );
       case 4:

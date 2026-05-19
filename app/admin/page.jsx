@@ -312,7 +312,7 @@ export default function AdminPage() {
                             Name
                           </th>
                           <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                            Color
+                            Character
                           </th>
                           <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                             Bio
@@ -326,17 +326,9 @@ export default function AdminPage() {
                               {user.name}
                             </td>
                             <td className="px-6 py-4">
-                              <div className="flex items-center space-x-2">
-                                <div
-                                  className="w-6 h-6 rounded-full border border-gray-300"
-                                  style={{
-                                    backgroundColor: user.color || "#53674F",
-                                  }}
-                                ></div>
-                                <span className="text-gray-600 text-sm">
-                                  {user.color || "#53674F"}
-                                </span>
-                              </div>
+                              <span className="text-gray-600 text-sm font-medium">
+                                {user.character === "char_male" ? "Style 1" : user.character === "char_female" ? "Style 2" : "Neutral"}
+                              </span>
                             </td>
                             <td className="px-6 py-4 text-gray-600 max-w-xs truncate">
                               {user.bio || "No bio"}

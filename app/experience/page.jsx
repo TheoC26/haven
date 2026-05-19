@@ -17,7 +17,7 @@ import {
   GAME_CONSTANTS,
 } from "@/config/images";
 
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { db } from "@/firebase";
 
 // Game Engine Imports
@@ -223,6 +223,9 @@ const Experience = () => {
     return () => network.disconnect();
   }, [userData]);
 
+  const isCloseEnoughRef = useRef(false);
+  const closestClubIdRef = useRef(null);
+
   // Helper: Interaction Logic
   const updateInteractions = (engine) => {
     const player = engine.player;
@@ -232,45 +235,67 @@ const Experience = () => {
     let closest = null;
 
     clubs.forEach(club => {
-      const dist = Math.sqrt(Math.pow(player.x - club.pos_x, 2) + Math.pow(player.y - club.pos_y, 2));
+      // Use center of player and club for distance (as per original logic)
+      const px = player.x + player.width / 2;
+      const py = player.y + player.height / 2;
+      const cx = club.pos_x + (imagesRef.current[`house${club.house_image}`]?.naturalWidth || 200) / 2;
+      const cy = club.pos_y + (imagesRef.current[`house${club.house_image}`]?.naturalHeight || 200) / 2;
+      
+      const dist = Math.sqrt(Math.pow(px - cx, 2) + Math.pow(py - cy, 2));
+      
       if (dist < minDist) {
         minDist = dist;
         closest = club;
       }
     });
 
-    if (minDist < GAME_CONSTANTS.CLUB_INTERACTION_DISTANCE) {
-      if (!isCloseEnoughToClub) {
+    const isCloseNow = minDist < GAME_CONSTANTS.CLUB_INTERACTION_DISTANCE;
+
+    // Only update state if there's a change or if we need to update the message for a different club
+    if (isCloseNow) {
+      if (!isCloseEnoughRef.current || closestClubIdRef.current !== closest.id) {
+        isCloseEnoughRef.current = true;
+        closestClubIdRef.current = closest.id;
         setIsCloseEnoughToClub(true);
         setClosestClubState(closest);
         setMessage(`Enter ${closest.name}`);
       }
-    } else if (isCloseEnoughToClub) {
-      setIsCloseEnoughToClub(false);
-      setClosestClubState(null);
+    } else {
+      if (isCloseEnoughRef.current) {
+        isCloseEnoughRef.current = false;
+        closestClubIdRef.current = null;
+        setIsCloseEnoughToClub(false);
+        setClosestClubState(null);
+      }
     }
   };
 
-  // 5. User Data Fetching
+  // 5. User Data Fetching (Real-time)
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (!user || user.isAnonymous) return;
-      try {
-        setIsLoading(true);
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          setUserData(userSnap.data());
-        } else {
-          setUserData({ name: "Anonymous User", color: "#6A3C1F" });
+    if (!user || user.isAnonymous) return;
+
+    setIsLoading(true);
+    const userRef = doc(db, "users", user.uid);
+    
+    const unsubscribe = onSnapshot(userRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setUserData(data);
+        
+        // Sync character to local player instantly
+        if (engineRef.current?.player && data.character) {
+          engineRef.current.player.setCharacter(data.character);
         }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      } finally {
-        setIsLoading(false);
+      } else {
+        setUserData({ name: "Anonymous User", character: "char_ambiguous" });
       }
-    };
-    fetchUserData();
+      setIsLoading(false);
+    }, (error) => {
+      console.error("Error listening to user data:", error);
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
   }, [user]);
 
   // Handlers

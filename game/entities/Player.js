@@ -1,5 +1,6 @@
 import { Entity } from "./Entity";
 import { GAME_CONSTANTS } from "@/config/images";
+import { Club } from "./Club";
 
 export class Player extends Entity {
   constructor(x, y, images, animations) {
@@ -13,6 +14,7 @@ export class Player extends Entity {
     this.scale = scale;
     this.images = images;
     this.animations = animations;
+    this.characterId = "char_ambiguous"; // Default
 
     this.speed = GAME_CONSTANTS.PLAYER_SPEED;
     this.diagonalSpeed = GAME_CONSTANTS.PLAYER_DIAGONAL_SPEED;
@@ -29,39 +31,71 @@ export class Player extends Entity {
     this.currentFrame = [1, 2]; // Default idle-down
   }
 
+  setCharacter(characterId) {
+    this.characterId = characterId;
+  }
+
   update(gameState) {
     this.handleMovement(gameState);
     this.updateAnimation();
   }
 
+  checkCollision(gameState, dx = 0, dy = 0) {
+    const clubs = gameState.entities.filter(e => e instanceof Club);
+    
+    // Player collision rectangle (from original logic: y offset 100, height reduced by 100)
+    const playerRect = {
+      x: this.x + dx,
+      y: this.y + 100 + dy,
+      width: this.width,
+      height: this.height - 100
+    };
+
+    for (const club of clubs) {
+      const clubRect = {
+        x: club.x + 50,
+        y: club.y + 200,
+        width: club.width - 100,
+        height: club.height - 250
+      };
+
+      if (
+        playerRect.x < clubRect.x + clubRect.width &&
+        playerRect.x + playerRect.width > clubRect.x &&
+        playerRect.y < clubRect.y + clubRect.height &&
+        playerRect.y + playerRect.height > clubRect.y
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   handleMovement(gameState) {
-    // Update speed for diagonal movement
     const movingDiagonal =
       (this.directions.up || this.directions.down) &&
       (this.directions.left || this.directions.right);
     this.currentSpeed = movingDiagonal ? this.diagonalSpeed : this.speed;
 
-    const prevX = this.x;
-    const prevY = this.y;
+    const moveStep = this.currentSpeed;
 
-    if (this.directions.up) {
-      this.y -= this.currentSpeed;
-      gameState.scroll.y += this.currentSpeed;
+    if (this.directions.up && !this.checkCollision(gameState, 0, -moveStep)) {
+      this.y -= moveStep;
+      gameState.scroll.y += moveStep;
     }
-    if (this.directions.down) {
-      this.y += this.currentSpeed;
-      gameState.scroll.y -= this.currentSpeed;
+    if (this.directions.down && !this.checkCollision(gameState, 0, moveStep)) {
+      this.y += moveStep;
+      gameState.scroll.y -= moveStep;
     }
-    if (this.directions.left) {
-      this.x -= this.currentSpeed;
-      gameState.scroll.x += this.currentSpeed;
+    if (this.directions.left && !this.checkCollision(gameState, -moveStep, 0)) {
+      this.x -= moveStep;
+      gameState.scroll.x += moveStep;
     }
-    if (this.directions.right) {
-      this.x += this.currentSpeed;
-      gameState.scroll.x -= this.currentSpeed;
+    if (this.directions.right && !this.checkCollision(gameState, moveStep, 0)) {
+      this.x += moveStep;
+      gameState.scroll.x -= moveStep;
     }
 
-    // Determine state
     if (this.directions.left) {
       this.state = "walk-left";
       this.lastDirection = "left";
@@ -87,6 +121,7 @@ export class Player extends Entity {
 
   updateAnimation() {
     const animation = this.animations[this.state];
+    if (!animation) return;
     this.frameCounter -= 1;
     if (this.frameCounter <= 0) {
       this.frame = (this.frame + 1) % animation.length;
@@ -96,10 +131,11 @@ export class Player extends Entity {
   }
 
   draw(ctx, scroll) {
-    if (!this.images.char || !this.images.char.complete) return;
+    const charImg = this.images[this.characterId];
+    if (!charImg || !charImg.complete) return;
 
     ctx.drawImage(
-      this.images.char,
+      charImg,
       this.currentFrame[0] * this.rawWidth,
       this.currentFrame[1] * this.rawHeight,
       this.rawWidth,
@@ -116,6 +152,7 @@ export class Player extends Entity {
       position: { x: this.x, y: this.y },
       state: this.state,
       currentFrame: this.currentFrame,
+      character: this.characterId,
     };
   }
 }

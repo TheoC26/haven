@@ -36,6 +36,7 @@ export class GameEngine {
       deltaTime,
       scroll: this.scroll,
       canvas: this.canvas,
+      entities: this.entityManager.entities, // Pass entities for collision checks
     };
     this.entityManager.update(gameState);
   }
