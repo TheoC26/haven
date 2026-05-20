@@ -2,14 +2,14 @@ import { Entity } from "./Entity";
 import { GAME_CONSTANTS } from "@/config/images";
 
 export class OtherPlayer extends Entity {
-  constructor(id, data, images) {
+  constructor(id, data, imagesRef) {
     const width = GAME_CONSTANTS.PLAYER_WIDTH * GAME_CONSTANTS.PLAYER_SCALE;
     const height = GAME_CONSTANTS.PLAYER_HEIGHT * GAME_CONSTANTS.PLAYER_SCALE;
     super(data.position.x, data.position.y, width, height);
 
     this.id = id;
     this.name = data.name || "Anonymous";
-    this.images = images;
+    this.imagesRef = imagesRef; // Use the Ref itself
     this.currentFrame = data.currentFrame || [1, 2];
     this.state = data.state || "idle-down";
     this.characterId = data.character || "char_ambiguous";
@@ -27,7 +27,7 @@ export class OtherPlayer extends Entity {
     this.currentFrame = data.currentFrame;
     this.name = data.name || this.name;
     if (data.character) {
-        this.characterId = data.character;
+      this.characterId = data.character;
     }
   }
 
@@ -37,7 +37,10 @@ export class OtherPlayer extends Entity {
   }
 
   draw(ctx, scroll) {
-    const charImg = this.images[this.characterId] || this.images.char;
+    const images = this.imagesRef.current;
+    if (!images) return;
+    
+    const charImg = images[this.characterId] || images.char;
     if (!charImg || !charImg.complete) return;
 
     const rawWidth = GAME_CONSTANTS.PLAYER_WIDTH;

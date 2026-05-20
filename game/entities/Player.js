@@ -3,7 +3,7 @@ import { GAME_CONSTANTS } from "@/config/images";
 import { Club } from "./Club";
 
 export class Player extends Entity {
-  constructor(x, y, images, animations) {
+  constructor(x, y, imagesRef, animations) {
     const width = GAME_CONSTANTS.PLAYER_WIDTH;
     const height = GAME_CONSTANTS.PLAYER_HEIGHT;
     const scale = GAME_CONSTANTS.PLAYER_SCALE;
@@ -12,9 +12,9 @@ export class Player extends Entity {
     this.rawWidth = width;
     this.rawHeight = height;
     this.scale = scale;
-    this.images = images;
+    this.imagesRef = imagesRef; // Use the Ref itself
     this.animations = animations;
-    this.characterId = "char_ambiguous"; // Default
+    this.characterId = "char_ambiguous"; 
 
     this.speed = GAME_CONSTANTS.PLAYER_SPEED;
     this.diagonalSpeed = GAME_CONSTANTS.PLAYER_DIAGONAL_SPEED;
@@ -28,7 +28,7 @@ export class Player extends Entity {
     this.frame = 0;
     this.frameCounter = 5;
     this.frameDuration = 5;
-    this.currentFrame = [1, 2]; // Default idle-down
+    this.currentFrame = [1, 2]; 
   }
 
   setCharacter(characterId) {
@@ -41,9 +41,8 @@ export class Player extends Entity {
   }
 
   checkCollision(gameState, dx = 0, dy = 0) {
-    const clubs = gameState.entities.filter(e => e instanceof Club);
+    const clubs = gameState.entities.filter(e => e.constructor.name === 'Club');
     
-    // Player collision rectangle (from original logic: y offset 100, height reduced by 100)
     const playerRect = {
       x: this.x + dx,
       y: this.y + 100 + dy,
@@ -131,7 +130,10 @@ export class Player extends Entity {
   }
 
   draw(ctx, scroll) {
-    const charImg = this.images[this.characterId];
+    const images = this.imagesRef.current;
+    if (!images) return;
+
+    const charImg = images[this.characterId];
     if (!charImg || !charImg.complete) return;
 
     ctx.drawImage(

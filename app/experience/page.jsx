@@ -17,7 +17,7 @@ import {
   GAME_CONSTANTS,
 } from "@/config/images";
 
-import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/firebase";
 
 // Game Engine Imports
@@ -33,7 +33,6 @@ const Experience = () => {
   // Canvas references
   const canvasRef = useRef(null);
   const engineRef = useRef(null);
-  const networkRef = useRef(null);
   const otherPlayersRef = useRef({});
 
   // UI state
@@ -56,9 +55,8 @@ const Experience = () => {
   const { clubs, loading: loadingClubs } = useClubs();
   const { decorations, loading: loadingDecorations } = useDecorations();
   const [userData, setUserData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  // Animation definitions (moved here or could be in config)
+  // Animation definitions
   const animations = {
     "idle-down": [[1, 2]],
     "idle-right": [[0, 0]],
@@ -81,19 +79,13 @@ const Experience = () => {
       imagesRef.current[key] = img;
     });
 
-    // Check visit status
     const hasVisited = localStorage.getItem("hasVisited");
     if (!hasVisited) {
       setShowGreeting(true);
       localStorage.setItem("hasVisited", "true");
     }
     setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
-
-    // Redirect if not logged in
-    if (!user && !localStorage.getItem("isLoggingIn")) {
-      // window.location.href = "/"; // Temporarily commented to avoid redirect loop during dev
-    }
-  }, [user]);
+  }, []);
 
   // 2. Initialize Game Engine
   useEffect(() => {
@@ -102,17 +94,23 @@ const Experience = () => {
     const engine = new GameEngine(canvasRef.current);
     engineRef.current = engine;
 
-    // Initial Resize
     engine.resize(window.innerWidth, window.innerHeight);
 
     // Setup Local Player
     const startX = window.innerWidth / 2 - (GAME_CONSTANTS.PLAYER_WIDTH * GAME_CONSTANTS.PLAYER_SCALE) / 2 + GAME_CONSTANTS.INITIAL_PLAYER_OFFSET.x;
     const startY = window.innerHeight / 2 - (GAME_CONSTANTS.PLAYER_HEIGHT * GAME_CONSTANTS.PLAYER_SCALE) / 2 + GAME_CONSTANTS.INITIAL_PLAYER_OFFSET.y;
     
-    const localPlayer = new Player(startX, startY, imagesRef.current, animations);
+    const localPlayer = new Player(startX, startY, imagesRef, animations);
+    engine.setPlayer(localPlayer);
     engine.entityManager.addEntity(localPlayer);
-    engine.player = localPlayer;
     engine.scroll = { x: -GAME_CONSTANTS.INITIAL_PLAYER_OFFSET.x, y: -GAME_CONSTANTS.INITIAL_PLAYER_OFFSET.y };
+
+    // Interaction Callback
+    engine.onInteractionUpdate = (isClose, club) => {
+      setIsCloseEnoughToClub(isClose);
+      setClosestClubState(club);
+      if (isClose && club) setMessage(`Enter ${club.name}`);
+    };
 
     // Add Creatures
     const creature = new Creature(700, 800, "/art/creatures/creature1.png", 0.8);
@@ -120,19 +118,14 @@ const Experience = () => {
 
     engine.start();
 
-    // Resize listener
     const handleResize = () => engine.resize(window.innerWidth, window.innerHeight);
     window.addEventListener("resize", handleResize);
 
-    // Keyboard Listeners
     const handleKeyDown = (e) => {
       if (e.code === "ArrowLeft") localPlayer.directions.left = true;
       if (e.code === "ArrowRight") localPlayer.directions.right = true;
       if (e.code === "ArrowUp") localPlayer.directions.up = true;
       if (e.code === "ArrowDown") localPlayer.directions.down = true;
-      if (e.code === "Enter") {
-         // Handle interactions here or in engine.update
-      }
     };
 
     const handleKeyUp = (e) => {
@@ -157,8 +150,6 @@ const Experience = () => {
   useEffect(() => {
     if (!engineRef.current || !clubs) return;
     
-    // Clear old clubs and decorations before adding new ones
-    // (In a more complex app, you'd sync only changes)
     engineRef.current.entityManager.entities = engineRef.current.entityManager.entities.filter(
       e => !(e instanceof Club) && !(e instanceof Decoration)
     );
@@ -195,7 +186,7 @@ const Experience = () => {
         if (msg.sender && msg.sender !== network.playerId) {
           let other = otherPlayersRef.current[msg.sender];
           if (!other) {
-            other = new OtherPlayer(msg.sender, msg, imagesRef.current);
+            other = new OtherPlayer(msg.sender, msg, imagesRef);
             otherPlayersRef.current[msg.sender] = other;
             engineRef.current.entityManager.addEntity(other);
           }
@@ -205,94 +196,33 @@ const Experience = () => {
     );
 
     network.connect();
-    networkRef.current = network;
+    engineRef.current.setNetworkManager(network);
 
-    // Pulse position updates in the main loop
-    const originalUpdate = engineRef.current.update.bind(engineRef.current);
-    engineRef.current.update = (deltaTime) => {
-      originalUpdate(deltaTime);
-      
-      // Update interactions (Checking closest club)
-      updateInteractions(engineRef.current);
-
-      if (engineRef.current.player && userData) {
-        network.sendUpdate(engineRef.current.player.getStateForNetwork(), userData);
-      }
+    return () => {
+      network.disconnect();
+      engineRef.current.setNetworkManager(null);
     };
-
-    return () => network.disconnect();
-  }, [userData]);
-
-  const isCloseEnoughRef = useRef(false);
-  const closestClubIdRef = useRef(null);
-
-  // Helper: Interaction Logic
-  const updateInteractions = (engine) => {
-    const player = engine.player;
-    if (!player || !clubs) return;
-
-    let minDist = Infinity;
-    let closest = null;
-
-    clubs.forEach(club => {
-      // Use center of player and club for distance (as per original logic)
-      const px = player.x + player.width / 2;
-      const py = player.y + player.height / 2;
-      const cx = club.pos_x + (imagesRef.current[`house${club.house_image}`]?.naturalWidth || 200) / 2;
-      const cy = club.pos_y + (imagesRef.current[`house${club.house_image}`]?.naturalHeight || 200) / 2;
-      
-      const dist = Math.sqrt(Math.pow(px - cx, 2) + Math.pow(py - cy, 2));
-      
-      if (dist < minDist) {
-        minDist = dist;
-        closest = club;
-      }
-    });
-
-    const isCloseNow = minDist < GAME_CONSTANTS.CLUB_INTERACTION_DISTANCE;
-
-    // Only update state if there's a change or if we need to update the message for a different club
-    if (isCloseNow) {
-      if (!isCloseEnoughRef.current || closestClubIdRef.current !== closest.id) {
-        isCloseEnoughRef.current = true;
-        closestClubIdRef.current = closest.id;
-        setIsCloseEnoughToClub(true);
-        setClosestClubState(closest);
-        setMessage(`Enter ${closest.name}`);
-      }
-    } else {
-      if (isCloseEnoughRef.current) {
-        isCloseEnoughRef.current = false;
-        closestClubIdRef.current = null;
-        setIsCloseEnoughToClub(false);
-        setClosestClubState(null);
-      }
-    }
-  };
+  }, []);
 
   // 5. User Data Fetching (Real-time)
   useEffect(() => {
     if (!user || user.isAnonymous) return;
 
-    setIsLoading(true);
     const userRef = doc(db, "users", user.uid);
-    
     const unsubscribe = onSnapshot(userRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         setUserData(data);
-        
-        // Sync character to local player instantly
-        if (engineRef.current?.player && data.character) {
-          engineRef.current.player.setCharacter(data.character);
+        if (engineRef.current) {
+          engineRef.current.setUserData(data);
         }
       } else {
-        setUserData({ name: "Anonymous User", character: "char_ambiguous" });
+        const anonData = { name: "Anonymous User", character: "char_ambiguous" };
+        setUserData(anonData);
+        if (engineRef.current) {
+          engineRef.current.setUserData(anonData);
+        }
       }
-      setIsLoading(false);
-    }, (error) => {
-      console.error("Error listening to user data:", error);
-      setIsLoading(false);
     });
 
     return () => unsubscribe();
