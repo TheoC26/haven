@@ -111,7 +111,7 @@ const ApplyModal = ({ isOpen, onClose, clubId }) => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[70vh] overflow-auto"
+              className="relative bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[70vh] flex flex-col overflow-visible"
             >
               {/* Close button */}
               <button
@@ -133,17 +133,15 @@ const ApplyModal = ({ isOpen, onClose, clubId }) => {
                 </svg>
               </button>
 
-              {/* Content */}
-              <div className="overflow-y-auto">
-                {/* Header */}
-                <div className="fixed top-[8vh] left-1/2 -translate-x-1/2 -z-10 bg-white p-4 px-12 rounded-t-2xl">
-                  <Dialog.Title className="text-2xl font-semibold text-[#53674F] text-center">
-                    {success ? "Application Submitted!" : "Apply to Join Club"}
-                  </Dialog.Title>
-                </div>
+              {/* Header with "Bump" */}
+              <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white p-4 px-12 rounded-t-2xl -z-10">
+                <Dialog.Title className="text-2xl font-semibold text-[#53674F] text-center whitespace-nowrap">
+                  {success ? "Application Submitted!" : "Apply to Join Club"}
+                </Dialog.Title>
+              </div>
 
-                {/* Body */}
-                <div className="p-6 space-y-6">
+              {/* Body */}
+              <div className="p-6 space-y-6 pt-16 flex-1 overflow-y-auto min-h-0">
                   {success ? (
                     <div className="text-center space-y-4 mt-16">
                       <svg
@@ -258,7 +256,6 @@ const ApplyModal = ({ isOpen, onClose, clubId }) => {
                     </form>
                   )}
                 </div>
-              </div>
             </Dialog.Panel>
           </div>
         </Dialog>

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, orderBy, limit, startAfter, getDocs } from "firebase/firestore";
 import { db } from "@/firebase";
 
 const HouseModal = ({ isOpen, onClose, club, onApply }) => {
@@ -41,6 +41,55 @@ const HouseModal = ({ isOpen, onClose, club, onApply }) => {
       fetchMembers();
     }
   }, [club, isOpen]);
+
+  const [posts, setPosts] = useState([]);
+  const [lastVisiblePost, setLastVisiblePost] = useState(null);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
+
+  useEffect(() => {
+    const fetchInitialPosts = async () => {
+      if (!club?.id) return;
+      setLoadingPosts(true);
+      try {
+        const postsRef = collection(db, "club", club.id, "posts");
+        const q = query(postsRef, orderBy("createdAt", "desc"), limit(5));
+        const snapshot = await getDocs(q);
+        
+        const postsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setPosts(postsData);
+        setLastVisiblePost(snapshot.docs[snapshot.docs.length - 1]);
+        setHasMorePosts(snapshot.docs.length === 5);
+      } catch (err) {
+        console.error("Error fetching posts:", err);
+      } finally {
+        setLoadingPosts(false);
+      }
+    };
+
+    if (isOpen) {
+      fetchInitialPosts();
+    }
+  }, [club, isOpen]);
+
+  const loadMorePosts = async () => {
+    if (!lastVisiblePost || !club?.id) return;
+    setLoadingPosts(true);
+    try {
+      const postsRef = collection(db, "club", club.id, "posts");
+      const q = query(postsRef, orderBy("createdAt", "desc"), startAfter(lastVisiblePost), limit(5));
+      const snapshot = await getDocs(q);
+      
+      const postsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setPosts(prev => [...prev, ...postsData]);
+      setLastVisiblePost(snapshot.docs[snapshot.docs.length - 1]);
+      setHasMorePosts(snapshot.docs.length === 5);
+    } catch (err) {
+      console.error("Error fetching more posts:", err);
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
 
   if (!club) return null;
 
@@ -80,7 +129,7 @@ const HouseModal = ({ isOpen, onClose, club, onApply }) => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[70vh] overflow-auto"
+              className="relative bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[70vh] flex flex-col overflow-visible"
             >
               {/* Close button */}
               <button
@@ -102,10 +151,17 @@ const HouseModal = ({ isOpen, onClose, club, onApply }) => {
                 </svg>
               </button>
 
-              {/* Content */}
-              <div className="overflow-y-auto">
+              {/* Header with "Bump" */}
+              <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white p-4 px-12 rounded-t-2xl -z-10">
+                <Dialog.Title className="text-2xl font-semibold text-[#53674F] text-center whitespace-nowrap">
+                  {club.name}
+                </Dialog.Title>
+              </div>
+
+              {/* Body */}
+              <div className="flex-1 overflow-y-auto min-h-0 pt-16">
                 {/* House Image */}
-                <div className="w-full h-full p-6">
+                <div className="w-full px-6">
                   <img
                     src={`/art/inside/house${club.house_image}.png`}
                     alt={club.name}
@@ -113,14 +169,6 @@ const HouseModal = ({ isOpen, onClose, club, onApply }) => {
                   />
                 </div>
 
-                {/* Header */}
-                <div className="fixed top-[8vh] left-1/2 -translate-x-1/2 -z-10 bg-white p-4 px-12 rounded-t-2xl">
-                  <Dialog.Title className="text-2xl font-semibold text-[#53674F] text-center">
-                    {club.name}
-                  </Dialog.Title>
-                </div>
-
-                {/* Body */}
                 <div className="p-6 space-y-6">
                   {/* Club info */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -200,6 +248,42 @@ const HouseModal = ({ isOpen, onClose, club, onApply }) => {
                     </div>
                   </div>
 
+                  {/* Club Updates Feed */}
+                  <div className="mt-8 pt-8 border-t border-[#53674F]/30">
+                    <h3 className="text-xl font-semibold mb-4 ">
+                      Club Updates
+                    </h3>
+                    <div className="space-y-4">
+                      {posts.length === 0 && !loadingPosts ? (
+                        <p className="text-gray-500 italic">No updates from this club yet.</p>
+                      ) : (
+                        posts.map(post => (
+                          <div key={post.id} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <div className="text-xs text-gray-500 mb-2">
+                              {post.createdAt?.toDate ? post.createdAt.toDate().toLocaleString() : "Just now"}
+                            </div>
+                            <div className="prose prose-sm max-w-none text-gray-800" dangerouslySetInnerHTML={{ __html: post.content }} />
+                          </div>
+                        ))
+                      )}
+                      
+                      {loadingPosts && (
+                        <div className="flex justify-center py-4">
+                          <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[#53674F]"></div>
+                        </div>
+                      )}
+                      
+                      {hasMorePosts && !loadingPosts && posts.length > 0 && (
+                        <button 
+                          onClick={loadMorePosts}
+                          className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
+                        >
+                          See more
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Members section */}
                   <div className="mt-8 pt-8 border-t border-[#53674F]/30">
                     <h3 className="text-xl font-semibold mb-4 ">
@@ -241,8 +325,8 @@ const HouseModal = ({ isOpen, onClose, club, onApply }) => {
                       Apply to Join This Club
                     </button>
                   </div>
+                  </div>
                 </div>
-              </div>
             </Dialog.Panel>
           </div>
         </Dialog>

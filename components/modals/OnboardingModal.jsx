@@ -183,7 +183,7 @@ const OnboardingModal = ({ isOpen, onClose }) => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[70vh] overflow-visable"
+              className="relative bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[70vh] flex flex-col overflow-visible"
             >
               {/* Header */}
               <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white p-4 px-12 rounded-t-2xl">
@@ -196,7 +196,7 @@ const OnboardingModal = ({ isOpen, onClose }) => {
               </div>
 
               {/* Body */}
-              <div className="p-6 space-y-6 pt-16">
+              <div className="p-6 space-y-6 pt-16 flex-1 overflow-y-auto min-h-0">
                 {renderStep()}
                 {error && (
                   <div className="text-red-600 text-sm mt-4">{error}</div>

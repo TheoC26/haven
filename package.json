@@ -10,6 +10,10 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
+    "@tailwindcss/typography": "^0.5.19",
+    "@tiptap/pm": "^3.23.5",
+    "@tiptap/react": "^3.23.5",
+    "@tiptap/starter-kit": "^3.23.5",
     "firebase": "^11.6.0",
     "framer-motion": "^12.5.0",
     "next": "15.2.8",

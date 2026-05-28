@@ -92,7 +92,7 @@ const SuggestClubModal = ({ isOpen, onClose }) => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[70vh] overflow-visable"
+              className="relative bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[70vh] flex flex-col overflow-visible"
             >
               {/* Close button */}
               <button
@@ -114,14 +114,14 @@ const SuggestClubModal = ({ isOpen, onClose }) => {
                 </svg>
               </button>
               {/* Header */}
-              <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white p-4 px-12 rounded-t-2xl">
+              <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white p-4 px-12 rounded-t-2xl -z-10">
                 <Dialog.Title className="text-2xl font-semibold text-[#53674F] text-center">
                   {success ? "Club Suggested!" : "Suggest a New Club"}
                 </Dialog.Title>
               </div>
 
               {/* Body */}
-              <div className="p-6 space-y-6 pt-16">
+              <div className="p-6 space-y-6 pt-16 flex-1 overflow-y-auto min-h-0">
                 {success ? (
                   <div className="text-center space-y-4">
                     <svg

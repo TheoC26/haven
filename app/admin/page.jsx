@@ -1,8 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
+import EditClubView from "@/components/admin/EditClubView";
 import {
   collection,
   getDocs,
@@ -21,6 +23,7 @@ export default function AdminPage() {
 
   const [activeTab, setActiveTab] = useState("clubs");
   const [clubs, setClubs] = useState([]);
+  const [editingClub, setEditingClub] = useState(null);
   const [users, setUsers] = useState([]);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -177,14 +180,19 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+    <div className="min-h-screen bg-white flex flex-col">
+      <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="p-6 bg-[#53674F] text-white">
-          <h1 className="text-3xl font-bold">Digital Haven Admin</h1>
-          <p className="text-[#53674F]/20 mt-1">
-            Manage clubs, users, and applications
-          </p>
+        <div className="p-6 bg-[#53674F] text-white flex justify-between items-center shrink-0">
+          <div>
+            <h1 className="text-3xl font-bold">Digital Haven Admin</h1>
+            <p className="text-[#53674F]/20 mt-1 text-green-100">
+              Manage clubs, users, and applications
+            </p>
+          </div>
+          <Link href="/editor" className="px-6 py-3 bg-white text-[#53674F] rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+            Go to Level Editor
+          </Link>
         </div>
 
         {/* Tab Navigation */}
@@ -222,7 +230,7 @@ export default function AdminPage() {
         </div>
 
         {/* Content Area */}
-        <div className="p-8">
+        <div className="p-8 flex-1 overflow-y-auto">
           {loading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#53674F]"></div>
@@ -235,6 +243,15 @@ export default function AdminPage() {
             <>
               {/* Clubs Tab */}
               {activeTab === "clubs" && (
+                editingClub ? (
+                  <EditClubView
+                    club={editingClub}
+                    onBack={() => setEditingClub(null)}
+                    onUpdate={(updatedClub) => {
+                      setClubs(clubs.map(c => c.id === updatedClub.id ? updatedClub : c));
+                    }}
+                  />
+                ) : (
                 <div>
                   <h2 className="text-2xl font-semibold text-black mb-6">
                     Manage Clubs
@@ -270,7 +287,13 @@ export default function AdminPage() {
                             <td className="px-6 py-4 text-gray-600">
                               {club.members ? club.members.length : 0}
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-6 py-4 flex gap-4">
+                              <button
+                                onClick={() => setEditingClub(club)}
+                                className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                              >
+                                Edit
+                              </button>
                               <button
                                 onClick={() => handleDeleteClub(club.id)}
                                 className="text-red-600 hover:text-red-800 font-medium transition-colors"
@@ -295,6 +318,7 @@ export default function AdminPage() {
                     </table>
                   </div>
                 </div>
+                )
               )}
 
               {/* Users Tab */}

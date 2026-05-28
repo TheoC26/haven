@@ -49,6 +49,9 @@ const Experience = () => {
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [showSuggestModal, setShowSuggestModal] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [isXKeyDown, setIsXKeyDown] = useState(false);
+
+  const isAnyModalOpen = showGreeting || showAuth || showOnboarding || showProfile || !!selectedClub || showApplyModal || showSuggestModal;
 
   // Data
   const { user, checkUserExists } = useAuth();
@@ -239,6 +242,33 @@ const Experience = () => {
     if (closestClubState) setSelectedClub(closestClubState);
   };
 
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      if (e.key.toLowerCase() === "x") {
+        setIsXKeyDown(true);
+        if (isCloseEnoughToClub && closestClubState && !isAnyModalOpen) {
+          setSelectedClub(closestClubState);
+        }
+      }
+    };
+
+    const handleGlobalKeyUp = (e) => {
+      if (e.key.toLowerCase() === "x") {
+        setIsXKeyDown(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    window.addEventListener("keyup", handleGlobalKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleGlobalKeyDown);
+      window.removeEventListener("keyup", handleGlobalKeyUp);
+    };
+  }, [isCloseEnoughToClub, closestClubState, isAnyModalOpen]);
+
   return (
     <main className="">
       <div className="fixed w-full h-full inset-0">
@@ -254,21 +284,25 @@ const Experience = () => {
 
       <button
         onClick={handleClosestClubClick}
-        className={`fixed cursor-pointer outline-none flex left-1/2 gap-2 top-1/3 border-2 border-green-800 text-green-800 -translate-x-1/2 translate-y-0 scale-96 bg-white px-4 py-2 rounded-lg transition-all opacity-0 z-10 ${
+        className={`fixed cursor-pointer outline-none flex left-1/2 gap-3 top-1/3 border-2 border-green-800 text-green-800 -translate-x-1/2 translate-y-0 scale-96 bg-white px-4 py-2 rounded-lg transition-all opacity-0 z-10 ${
           isCloseEnoughToClub && "opacity-100 translate-y-4 scale-100"
         }`}
       >
         <div>{message}</div>
-        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#016630">
-          <path d="m284.91-434.5 106.68 106.67q12.67 12.68 12.67 31.83t-12.67 31.83q-12.68 12.67-31.83 12.67t-31.83-12.67l-184-183.76q-6.71-6.72-9.81-14.92-3.1-8.19-3.1-17.15 0-8.96 3.1-17.15 3.1-8.2 9.81-14.92l184-183.76q12.68-12.67 31.83-12.67t31.83 12.67q12.67 12.68 12.67 31.83t-12.67 31.83L284.91-525.5h472.22V-640q0-19.15 13.17-32.33 13.18-13.17 32.33-13.17t32.33 13.17q13.17 13.18 13.17 32.33v114.5q0 37.78-26.61 64.39t-64.39 26.61H284.91Z" />
-        </svg>
+        <div className="w-6 h-6 relative">
+          <div className={`bg-[#016730] rounded-sm absolute inset-0 bottom-1 grid place-items-center transition-transform ${isXKeyDown ? 'translate-y-1' : ''}`}>
+            <span className="text-white font-bold text-xs">X</span>
+          </div>
+          <div className="border border-[#016730] rounded-sm absolute inset-0 top-1 bottom-px"></div>
+        </div>
+
       </button>
 
       {user && !user.isAnonymous && (
         <div className="fixed bottom-6 left-6 z-10">
           <button
             onClick={() => setShowSuggestModal(true)}
-            className="bg-[#53674F] text-white py-3 px-5 rounded-full hover:bg-[#53674F]/90 transition-colors shadow-lg flex items-center"
+            className="bg-[#53674F] text-white py-3 px-5 rounded-2xl cursor-pointer hover:scale-105 transition-colors shadow-lg flex items-center"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

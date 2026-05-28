@@ -875,7 +875,7 @@ const LevelEditor = () => {
     drawDecorations(); // Will use decorationsStateRef.current
     drawHousePreview();
     drawDecorationPreview();
-    drawPlayer();
+    // drawPlayer();
     stateHandler();
     animationHandler();
   }
