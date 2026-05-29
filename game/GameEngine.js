@@ -86,7 +86,7 @@ export class GameEngine {
     let closest = null;
     
     // Import Club dynamically or check type
-    const clubs = this.entityManager.entities.filter(e => e.constructor.name === 'Club');
+    const clubs = this.entityManager.entities.filter(e => e.type === 'Club');
 
     clubs.forEach(club => {
       // Use center of player and club for distance

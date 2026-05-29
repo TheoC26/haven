@@ -41,7 +41,7 @@ export class Player extends Entity {
   }
 
   checkCollision(gameState, dx = 0, dy = 0) {
-    const clubs = gameState.entities.filter(e => e.constructor.name === 'Club');
+    const clubs = gameState.entities.filter(e => e.type === 'Club');
     
     const playerRect = {
       x: this.x + dx,

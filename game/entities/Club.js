@@ -8,6 +8,7 @@ export class Club extends Entity {
     super(data.pos_x, data.pos_y, 200, 200);
     this.data = data;
     this.imagesRef = imagesRef;
+    this.type = 'Club';
     
     // Adjust Y-sort offset because the base of the house isn't the bottom of the image usually
     // In this game's art, the sorting point is around 1/4 from the bottom of the image based on old code

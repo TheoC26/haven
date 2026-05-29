@@ -186,7 +186,7 @@ export default function AdminPage() {
         <div className="p-6 bg-[#53674F] text-white flex justify-between items-center shrink-0">
           <div>
             <h1 className="text-3xl font-bold">Digital Haven Admin</h1>
-            <p className="text-[#53674F]/20 mt-1 text-green-100">
+            <p className="mt-1 text-green-100">
               Manage clubs, users, and applications
             </p>
           </div>
